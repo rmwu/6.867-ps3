@@ -1,0 +1,34 @@
+code/data/*
+code/*.pdf
+code/art_data/*
+.DS_STORE
+*.pyc
+.ipynb_checkpoints
+*.ipynb
+*.gz
+
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+
+## Intermediate documents:
+*.dvi
+*-converted-to.*
+# these rules might exclude image files for figures etc.
+# *.ps
+# *.eps
+# *.pdf
+# !paper/img/*.pdf
+paper/*.pdf
+**out.txt
+**play
+
