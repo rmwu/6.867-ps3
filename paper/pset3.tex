@@ -118,11 +118,51 @@ strongly suggesting that our network is overfitting.
 
 \subsection{Pooling}
 
-% TODO
+% and choose different values for the pooling filter size and stride.
+% After you applied max pooling, what happened to your results?
+% How did the training accuracy vs. validation accuracy change?
+We modified our network by adding max-pooling
+after both convolutional layers.
+We experimented with various pooling filter sizes (1 to 4)
+and strides (1 to 4).
+In all cases,
+pooling modestly reduced training accuracy
+(from around $100\%$ to $90\%$),
+but did not improve validation accuracy noticeably.
+Accuracy was typically $60\%$ to $70\%$.
+
+Variations in validation accuracy
+stemmed from the randomness inherent in our stochastic training scheme,
+as variation in accuracy between runs with different hyperparameters
+was comparable to the that between runs with the same hyperparameters.
+% make less verbose?
+
+% What does that tell you about the effect of max pooling on your network?
+We conclude that max-pooling provides little improvement
+to our convolutional network.
 
 \subsection{Regularization}
 
-% TODO
+To combat the overfitting we saw earlier,
+we tested various methods of regularization.
+
+% Test each one individually,
+% and discuss how it affects your results.
+
+\subsubsection{Dropout}
+
+% You should explore different values of dropout_prob
+% to find one that works well.
+
+\subsubsection{Weight regularization}
+
+\subsubsection{Data augmentation}
+
+\subsubsection{Early stopping}
+
+
+
+
 
 \subsection{Architecture variations}
 
