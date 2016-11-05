@@ -4,6 +4,7 @@ from six.moves import cPickle as pickle
 import sys
 import math
 import time
+import argparse
 
 DATA_PATH = 'art_data/'
 DATA_FILE = DATA_PATH + 'art_data.pickle'
@@ -13,18 +14,19 @@ NUM_LABELS = 11
 INCLUDE_TEST_SET = False
 
 class ArtistConvNet:
-	def __init__(self, invariance=False):
+	def __init__(self, invariance=False, dropout_frac=1.0):
 		'''Initialize the class by loading the required datasets 
 		and building the graph'''
 		self.load_pickled_dataset(DATA_FILE)
 		self.invariance = invariance
+		self.dropout_frac = dropout_frac
 		if invariance:
 			self.load_invariance_datasets()
 		self.graph = tf.Graph()
 		self.define_tensorflow_graph()
 
 	def define_tensorflow_graph(self):
-		print '\nDefining model...'
+		print('\nDefining model...')
 		
 		# Hyperparameters
 		batch_size = 10
@@ -47,7 +49,7 @@ class ArtistConvNet:
 		layer2_pool_stride = 2
 
 		# Enable dropout and weight decay normalization
-		dropout_prob = 1.0 # set to < 1.0 to apply dropout, 1.0 to remove
+		dropout_prob = self.dropout_frac # set to < 1.0 to apply dropout, 1.0 to remove
 		weight_penalty = 0.0 # set to > 0.0 to apply weight penalty, 0.0 to remove
 
 		with self.graph.as_default():
@@ -136,7 +138,7 @@ class ArtistConvNet:
 				'''Train the model with minibatches in a tensorflow session'''
 				with tf.Session(graph=self.graph) as session:
 					tf.initialize_all_variables().run()
-					print 'Initializing variables...'
+					print('Initializing variables...')
 					
 					for step in range(num_steps):
 						offset = (step * batch_size) % (self.train_Y.shape[0] - batch_size)
@@ -150,14 +152,14 @@ class ArtistConvNet:
 						  [optimizer, loss, train_prediction], feed_dict=feed_dict)
 						if (step % 100 == 0):
 							val_preds = session.run(valid_prediction, feed_dict={dropout_keep_prob : 1.0})
-							print ''
+							print('')
 							print('Batch loss at step %d: %f' % (step, l))
 							print('Batch training accuracy: %.1f%%' % accuracy(predictions, batch_labels))
 							print('Validation accuracy: %.1f%%' % accuracy(val_preds, self.val_Y))
 					
 					# This code is for the final question
 					if self.invariance:
-						print "\n Obtaining final results on invariance sets!"
+						print("\n Obtaining final results on invariance sets!")
 						sets = [self.val_X, self.translated_val_X, self.bright_val_X, self.dark_val_X, 
 								self.high_contrast_val_X, self.low_contrast_val_X, self.flipped_val_X, 
 								self.inverted_val_X,]
@@ -167,7 +169,7 @@ class ArtistConvNet:
 						for i in range(len(sets)):
 							preds = session.run(test_prediction, 
 								feed_dict={tf_test_dataset: sets[i], dropout_keep_prob : 1.0})
-							print 'Accuracy on', set_names[i], 'data: %.1f%%' % accuracy(preds, self.val_Y)
+							print('Accuracy on', set_names[i], 'data: %.1f%%' % accuracy(preds, self.val_Y))
 
 							# save final preds to make confusion matrix
 							if i == 0:
@@ -177,9 +179,9 @@ class ArtistConvNet:
 			self.train_model = train_model
 
 	def load_pickled_dataset(self, pickle_file):
-		print "Loading datasets..."
+		print("Loading datasets...")
 		with open(pickle_file, 'rb') as f:
-			save = pickle.load(f)
+			save = pickle.load(f, encoding='latin1')
 			self.train_X = save['train_data']
 			self.train_Y = save['train_labels']
 			self.val_X = save['val_data']
@@ -189,13 +191,14 @@ class ArtistConvNet:
 				self.test_X = save['test_data']
 				self.test_Y = save['test_labels']
 			del save  # hint to help gc free up memory
-		print 'Training set', self.train_X.shape, self.train_Y.shape
-		print 'Validation set', self.val_X.shape, self.val_Y.shape
-		if INCLUDE_TEST_SET: print 'Test set', self.test_X.shape, self.test_Y.shape
+		print('Training set', self.train_X.shape, self.train_Y.shape)
+		print('Validation set', self.val_X.shape, self.val_Y.shape)
+		if INCLUDE_TEST_SET:
+			print('Test set', self.test_X.shape, self.test_Y.shape)
 
 	def load_invariance_datasets(self):
 		with open(DATA_PATH + 'invariance_art_data.pickle', 'rb') as f:
-			save = pickle.load(f)
+			save = pickle.load(f, encoding='latin1')
 			self.translated_val_X = save['translated_val_data']
 			self.flipped_val_X = save['flipped_val_data']
 			self.inverted_val_X = save['inverted_val_data']
@@ -213,13 +216,19 @@ def accuracy(predictions, labels):
           / predictions.shape[0])
 
 if __name__ == '__main__':
-	invariance = False
-	if len(sys.argv) > 1 and sys.argv[1] == 'invariance':
-		print "Testing finished model on invariance datasets!"
-		invariance = True
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--invariance", action=store_true,
+						help="Test finished model on invariance datasets.")
+	parser.add_argument("--dropout", type=float, default=1.0,
+						help="Dropout fraction. Defaults to 1.0")
+
+	args = parser.parser_args()
+	invariance = args.invariance
+	if invariance:
+		print("Testing finished model on invariance datasets!")
 	
 	t1 = time.time()
-	conv_net = ArtistConvNet(invariance=invariance)
+	conv_net = ArtistConvNet(invariance=invariance, dropout_frac=args.dropout)
 	conv_net.train_model()
 	t2 = time.time()
-	print "Finished training. Total time taken:", t2-t1
+	print("Finished training. Total time taken:", t2-t1)
