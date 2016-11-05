@@ -37,7 +37,98 @@
 \section{Neural Networks}
 \label{sec:nn}
 
-\section{Convolution Neural Networks}
+\section{Convolutional Neural Networks}
+
+% TODO connect from previous section
+
+Empirically, deeper convolution networks work better.
+To see why, we introduce the notion of \emph{receptive field}
+of a node (a ``pixel" in a feature map):
+the pixels from the original image that contribute information
+to the node.
+
+% What are the dimensions of the receptive field for a node in Z2?
+For example,
+suppose we have a convolutional network
+with two successive convolutional layers,
+with respective patch sizes $5\times 5$ and $3\times 3$.
+Each layer has a single feature map (which we name $Z_1$ and $Z_2$).
+Then the nodes in $Z_1$ each have $5\times 5$ receptive fields.
+Nodes in $Z_2$ will have $(3 + 5 - 1)^2 = 7\times 7$ receptive fields.
+
+% Thinking about your answer,
+% why is it effective to build convolutional networks deeper
+% (i.e. with more layers)?
+In general,
+nodes in deeper layers will have larger receptive fields,
+so intuitively,
+deeper convolutional networks should better detect large-scale structure.
+
+% How many layers are there?
+We tested an existing four-layer convolutional network implementation
+on an image classification problem,
+where given RGB images of 451 paintings by 11 artists
+(all downsampled to $50\times 50$),
+we would like to predict the artist that painted the given image.
+
+% Are they all convolutional?
+% If not, what structure do they have?
+The first two layers are convolutional;
+each produces 16 feature maps
+with $5\times 5$ filters and stride $2$.
+We zero-pad the feature maps prior to convolution
+so that feature maps remain the same size ($50\times 50$).
+
+Our last two layers are fully connected.
+The third layer has 64 hidden units;
+the final layer (our output) has 11 units,
+corresponding to the 11 artists represented in our dataset.
+
+% Which activation function is used on the hidden nodes?
+The network applies a ReLU activation on all hidden nodes.
+
+% What loss function is being used to train the network?
+% How is the loss being minimized?
+We train the network by minimizing softmax cross-entropy
+through gradient descent.
+Recall that average softmax cross-entropy is defined
+for labeled examples $(x\sind{i}, y\sind{i})$
+(where $y\sind{i}$ is a one-hot vector indicating the category of the example)
+as
+\begin{equation}
+    H(y, \hat y) = \f{1}{n}\sum_{i=1}^n
+                             \sum_{j=1}^k
+                               y\sind{i}_j \log \hat y\sind{i}_j,
+\end{equation}
+where $\hat y\sind{i}$ is the prediction made by our network,
+a vector of probabilities
+produced by applying a softmax function
+to the values on our output layer.
+For instance, for our image classification problem,
+$n$ is the number of images we are evaluating our network on,
+and $k=11$ is the number of classification categories.
+
+% What is the training accuracy for your network after training?
+% What is the validation accuracy?
+% What do these two numbers tell you about what your network is doing?
+After 1500 traininng steps,
+our convolutional network obtains perfect training accuracy,
+but only $67\%$ validation accuracy,
+strongly suggesting that our network is overfitting.
+
+\subsection{Pooling}
+
+% TODO
+
+\subsection{Regularization}
+
+% TODO
+
+\subsection{Architecture variations}
+
+
+
+
 \end{multicols}
 
 \end{document}
