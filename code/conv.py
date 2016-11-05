@@ -14,13 +14,13 @@ NUM_LABELS = 11
 INCLUDE_TEST_SET = False
 
 class ArtistConvNet:
-	def __init__(self, invariance=False, dropout_frac=1.0, pooling=False):
+	def __init__(self, invariance, dropout_frac, pooling_params):
 		'''Initialize the class by loading the required datasets 
 		and building the graph'''
 		self.load_pickled_dataset(DATA_FILE)
 		self.invariance = invariance
 		self.dropout_frac = dropout_frac
-		self.pooling = pooling
+		self.pooling_params = pooling_params
 		if invariance:
 			self.load_invariance_datasets()
 		self.graph = tf.Graph()
@@ -43,11 +43,11 @@ class ArtistConvNet:
 		num_training_steps = 1501
 
 		# Add max pooling
-		pooling = self.pooling
-		layer1_pool_filter_size = 2
-		layer1_pool_stride = 2
-		layer2_pool_filter_size = 2
-		layer2_pool_stride = 2
+		pooling = self.pooling_params["pooling"]
+		layer1_pool_filter_size = self.pooling_params["filter_size"]
+		layer1_pool_stride = self.pooling_params["stride"]
+		layer2_pool_filter_size = self.pooling_params["filter_size"]
+		layer2_pool_stride = self.pooling_params["stride"]
 
 		# Enable dropout and weight decay normalization
 		dropout_prob = self.dropout_frac # set to < 1.0 to apply dropout, 1.0 to remove
@@ -218,20 +218,28 @@ def accuracy(predictions, labels):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--invariance", action=store_true,
+	parser.add_argument("--invariance", action="store_true",
 						help="Test finished model on invariance datasets.")
 	parser.add_argument("--dropout", type=float, default=1.0,
 						help="Dropout fraction. Defaults to 1.0")
-	parser.add_argument("--pooling", action=store_true,
+	parser.add_argument("--pooling", action="store_true",
 						help="Turn on pooling.")
+	parser.add_argument("--pool_stride", type=int, default=2,
+						help="Pooling stride. Does not turn on pooling.")
+	parser.add_argument("--pool_filter_size", type=int, default=2,
+						help="Pooling filter size. Does not turn on pooling.")
 
-	args = parser.parser_args()
+	args = parser.parse_args()
 	invariance = args.invariance
 	if invariance:
 		print("Testing finished model on invariance datasets!")
 	
 	t1 = time.time()
-	conv_net = ArtistConvNet(invariance=invariance, dropout_frac=args.dropout, pooling=args.pooling)
+	conv_net = ArtistConvNet(invariance=invariance,
+							 dropout_frac=args.dropout,
+							 pooling_params={"pooling": args.pooling,
+							 		  		 "filter_size": args.pool_filter_size,
+							 		  		 "stride": args.pool_stride})
 	conv_net.train_model()
 	t2 = time.time()
 	print("Finished training. Total time taken:", t2-t1)
