@@ -14,12 +14,13 @@ NUM_LABELS = 11
 INCLUDE_TEST_SET = False
 
 class ArtistConvNet:
-	def __init__(self, invariance=False, dropout_frac=1.0):
+	def __init__(self, invariance=False, dropout_frac=1.0, pooling=False):
 		'''Initialize the class by loading the required datasets 
 		and building the graph'''
 		self.load_pickled_dataset(DATA_FILE)
 		self.invariance = invariance
 		self.dropout_frac = dropout_frac
+		self.pooling = pooling
 		if invariance:
 			self.load_invariance_datasets()
 		self.graph = tf.Graph()
@@ -42,7 +43,7 @@ class ArtistConvNet:
 		num_training_steps = 1501
 
 		# Add max pooling
-		pooling = False
+		pooling = self.pooling
 		layer1_pool_filter_size = 2
 		layer1_pool_stride = 2
 		layer2_pool_filter_size = 2
@@ -221,6 +222,8 @@ if __name__ == '__main__':
 						help="Test finished model on invariance datasets.")
 	parser.add_argument("--dropout", type=float, default=1.0,
 						help="Dropout fraction. Defaults to 1.0")
+	parser.add_argument("--pooling", action=store_true,
+						help="Turn on pooling.")
 
 	args = parser.parser_args()
 	invariance = args.invariance
@@ -228,7 +231,7 @@ if __name__ == '__main__':
 		print("Testing finished model on invariance datasets!")
 	
 	t1 = time.time()
-	conv_net = ArtistConvNet(invariance=invariance, dropout_frac=args.dropout)
+	conv_net = ArtistConvNet(invariance=invariance, dropout_frac=args.dropout, pooling=args.pooling)
 	conv_net.train_model()
 	t2 = time.time()
 	print("Finished training. Total time taken:", t2-t1)
