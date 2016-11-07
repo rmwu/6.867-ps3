@@ -1,11 +1,14 @@
-import tensorflow as tf
-import numpy as np
-import scipy.stats
-from six.moves import cPickle as pickle
 import sys
 import math
 import time
 import argparse
+
+from six.moves import cPickle as pickle
+
+import tensorflow as tf
+import numpy as np
+import scipy.stats
+
 
 DATA_PATH = 'art_data/'
 DATA_FILE = DATA_PATH + 'art_data.pickle'
@@ -15,7 +18,7 @@ NUM_LABELS = 11
 INCLUDE_TEST_SET = False
 
 class ArtistConvNet:
-    def __init__(self, invariance, dropout_frac, pooling_params):
+    def __init__(self, invariance, dropout_frac, weight_penalty, pooling_params):
         '''
         Initialize the class by loading the required datasets
         and building the graph.
@@ -23,6 +26,7 @@ class ArtistConvNet:
         self.load_pickled_dataset(DATA_FILE)
         self.invariance = invariance
         self.dropout_frac = dropout_frac
+        self.weight_penalty = weight_penalty
         self.pooling_params = pooling_params
         if invariance:
             self.load_invariance_datasets()
@@ -54,7 +58,7 @@ class ArtistConvNet:
 
         # Enable dropout and weight decay normalization
         dropout_prob = self.dropout_frac # set to < 1.0 to apply dropout, 1.0 to remove
-        weight_penalty = 0.0 # set to > 0.0 to apply weight penalty, 0.0 to remove
+        weight_penalty = self.weight_penalty # set to > 0.0 to apply weight penalty, 0.0 to remove
 
         with self.graph.as_default():
             # Input data
@@ -230,11 +234,12 @@ def accuracy(predictions, labels):
           / predictions.shape[0])
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--invariance", action="store_true",
                         help="Test finished model on invariance datasets.")
     parser.add_argument("--dropout", type=float, default=1.0,
-                        help="Dropout fraction. Defaults to 1.0")
+                        help="Dropout fraction.")
     parser.add_argument("--pooling", action="store_true",
                         help="Turn on pooling.")
     parser.add_argument("--pool_stride", type=int, default=2,
@@ -244,7 +249,8 @@ if __name__ == '__main__':
     parser.add_argument("--repeat", type=int, default=1,
                         help="Number of times to train with these parameters.")
     parser.add_argument("--weight_penalty", type=float, default=0.0,
-                        help="Regularization parameter for weight magnitudes.")
+                        help="Regularization parameter; "
+                             "coefficient on Frobenius weight matrix norms in loss.")
 
     args = parser.parse_args()
     invariance = args.invariance
@@ -255,6 +261,7 @@ if __name__ == '__main__':
     def train_single_conv_net():
         conv_net = ArtistConvNet(invariance=invariance,
                                  dropout_frac=args.dropout,
+                                 weight_penalty=args.weight_penalty,
                                  pooling_params={"pooling": args.pooling,
                                                  "filter_size": args.pool_filter_size,
                                                  "stride": args.pool_stride})
@@ -263,10 +270,13 @@ if __name__ == '__main__':
     t1 = time.time()
     accuracies = np.array([train_single_conv_net() for i in range(args.repeat)])
     t2 = time.time()
-    print("Finished training. Total time taken:", t2-t1)
+    print("Finished training. Total time taken: {}".format(t2 - t1))
 
     if args.repeat > 1:
         train_acc_mean, val_acc_mean = np.mean(accuracies, axis=0)
         train_acc_sem, val_acc_sem = scipy.stats.sem(accuracies)
         print("Mean training accuracy: {:.2%} +- {:.2%}".format(train_acc_mean, train_acc_sem))
         print("Mean validation accuracy: {:.2%} +- {:.2%}".format(val_acc_mean, val_acc_sem))
+
+    # remind us what we ran!
+    print("You ran command: {}".format(" ".join(sys.argv)))
