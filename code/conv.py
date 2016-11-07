@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+import scipy.stats
 from six.moves import cPickle as pickle
 import sys
 import math
@@ -140,11 +141,15 @@ class ArtistConvNet:
             def train_model(num_steps=num_training_steps):
                 '''
                 Train the model with minibatches in a TensorFlow session.
+                Return the final training minibatch accuracy
+                and validation accuracy as a tuple.
                 '''
                 with tf.Session(graph=self.graph) as session:
                     tf.initialize_all_variables().run()
                     print('Initializing variables...')
                     
+                    batch_train_accuracy = 0
+                    validation_accuracy = 0
                     for step in range(num_steps):
                         offset = (step * batch_size) % (self.train_Y.shape[0] - batch_size)
                         batch_data = self.train_X[offset:(offset + batch_size), :, :, :]
@@ -160,9 +165,9 @@ class ArtistConvNet:
                             batch_train_accuracy = accuracy(predictions, batch_labels)
                             validation_accuracy = accuracy(val_preds, self.val_Y)
                             print('')
-                            print('Batch loss at step %d: %f'.format(step, l))
-                            print('Batch training accuracy: %.1f%%'.format(batch_train_accuracy))
-                            print('Validation accuracy: %.1f%%'.format(validation_accuracy))
+                            print('Batch loss at step {:d}: {:f}'.format(step, l))
+                            print('Batch training accuracy: {:.2%}'.format(batch_train_accuracy))
+                            print('Validation accuracy: {:.2%}'.format(validation_accuracy))
                     
                     # This code is for the final question
                     if self.invariance:
@@ -176,11 +181,13 @@ class ArtistConvNet:
                         for i in range(len(sets)):
                             preds = session.run(test_prediction,
                                 feed_dict={tf_test_dataset: sets[i], dropout_keep_prob : 1.0})
-                            print('Accuracy on', set_names[i], 'data: %.1f%%' % accuracy(preds, self.val_Y))
+                            print("Accuracy on {} data: {:.2%}".format(set_names[i], accuracy(preds, self.val_Y)))
 
                             # save final preds to make confusion matrix
                             if i == 0:
                                 self.final_val_preds = preds
+
+                    return (batch_train_accuracy, validation_accuracy)
             
             # save train model function so it can be called later
             self.train_model = train_model
@@ -219,7 +226,7 @@ def weight_decay_penalty(weights, penalty):
     return penalty * sum([tf.nn.l2_loss(w) for w in weights])
 
 def accuracy(predictions, labels):
-  return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
+  return (np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
           / predictions.shape[0])
 
 if __name__ == '__main__':
@@ -234,18 +241,32 @@ if __name__ == '__main__':
                         help="Pooling stride. Does not turn on pooling.")
     parser.add_argument("--pool_filter_size", type=int, default=2,
                         help="Pooling filter size. Does not turn on pooling.")
+    parser.add_argument("--repeat", type=int, default=1,
+                        help="Number of times to train with these parameters.")
+    parser.add_argument("--weight_penalty", type=float, default=0.0,
+                        help="Regularization parameter for weight magnitudes.")
 
     args = parser.parse_args()
     invariance = args.invariance
     if invariance:
         print("Testing finished model on invariance datasets!")
     
+
+    def train_single_conv_net():
+        conv_net = ArtistConvNet(invariance=invariance,
+                                 dropout_frac=args.dropout,
+                                 pooling_params={"pooling": args.pooling,
+                                                 "filter_size": args.pool_filter_size,
+                                                 "stride": args.pool_stride})
+        return conv_net.train_model()
+
     t1 = time.time()
-    conv_net = ArtistConvNet(invariance=invariance,
-                             dropout_frac=args.dropout,
-                             pooling_params={"pooling": args.pooling,
-                                                "filter_size": args.pool_filter_size,
-                                                "stride": args.pool_stride})
-    conv_net.train_model()
+    accuracies = np.array([train_single_conv_net() for i in range(args.repeat)])
     t2 = time.time()
     print("Finished training. Total time taken:", t2-t1)
+
+    if args.repeat > 1:
+        train_acc_mean, val_acc_mean = np.mean(accuracies, axis=0)
+        train_acc_sem, val_acc_sem = scipy.stats.sem(accuracies)
+        print("Mean training accuracy: {:.2%} +- {:.2%}".format(train_acc_mean, train_acc_sem))
+        print("Mean validation accuracy: {:.2%} +- {:.2%}".format(val_acc_mean, val_acc_sem))
