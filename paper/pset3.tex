@@ -90,7 +90,8 @@ The network applies a ReLU activation on all hidden nodes.
 % What loss function is being used to train the network?
 % How is the loss being minimized?
 We train the network by minimizing softmax cross-entropy
-through gradient descent.
+through minibatch gradient descent,
+with batches of 10 examples each.
 Recall that average softmax cross-entropy is defined
 for labeled examples $(x\sind{i}, y\sind{i})$
 (where $y\sind{i}$ is a one-hot vector indicating the category of the example)
@@ -153,35 +154,31 @@ we tested various methods of regularization.
 
 \subsubsection{Dropout}
 
+
 We implemented dropout for the fully connected layer (the third layer).
 We tested various dropout parameters $p$
 (the probability we do \emph{not} drop out a number,
 so that $p = 1$ corresponds to no dropout)
-multiple times ($n=6$);
-we present the mean validation accuracies
-and the corresponding standard errors here:
+multiple times ($n=10$);
+we present the mean training and validation accuracies
+with their respective standard errors here.
+Training accuracies are quoted on the final minibatch of ten samples.
 \begin{center}
-    \begin{tabular}{c|c}
-        $p$ & Mean validation accuracy $\pm 1 \sigma$ (\%)\\\hline
-        0.5 & \\
-        0.6 & \\
-        0.7 & $64.6 \pm 0.9$ \\
-        0.8 & $65.0 \pm 1.0$ \\
-        0.9 & $65.5 \pm 1.3$ \\
-        1.0 & $64.4 \pm 0.6$ \\\hline
+    \begin{tabular}{c|cc}
+        $p$ & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
+        0.6 &  $77.00 \pm 2.60$ & $62.18 \pm 0.81$ \\
+        0.7 &  $75.00 \pm 3.42$ & $62.53 \pm 0.86$ \\
+        0.8 &  $89.00 \pm 3.48$ & $65.52 \pm 1.24$ \\
+        0.9 &  $94.00 \pm 2.21$ & $65.63 \pm 0.55$ \\
+        1.0 & $100.00 \pm 0.00$ & $65.63 \pm 1.01$ \\
     \end{tabular}
 \end{center}
-% 0.7 (62.1, 65.5, 64.4, 66.7, 66.7, 62.1)
-% 0.8 (69, 66.7, 64.4, 62.1, 63.2, 64.4)
-% 0.9 (71.3, 64.4, 64.4, 63.2, 66.7, 63.2)
-% 1.0 (65.5 + 62.1 + 63.2 + 64.4 + 65.5 + 65.5)
-
-% TODO redo this analysis, get training accuracies
-
-
 
 % You should explore different values of dropout_prob
 % to find one that works well.
+While dropout reduces training accuracy significantly,
+it only modestly affects validation accuracy.
+
 
 \subsubsection{Weight regularization}
 
