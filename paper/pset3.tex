@@ -192,15 +192,16 @@ validation accuracies were slightly, but noticeably lower.
 As we did previously,  % TODO check that this is mentioned in previous section
 we experimented with adding a regularization term
 to our training loss.
-In particular, we modify our softmax cross-entropy $\ell(w)$ as
+In particular, we modify our softmax cross-entropy loss $\ell(w)$
+to get a new loss
 \begin{equation}
-    \ell(w) + \lambda\sum_i ||w\sind{i}||^2
+    \ell(w) + \lambda\sum_i \lVert w\sind{i} \rVert^2
 \end{equation}
 where we include an extra term:
 the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$,
 weighted by a regularization parameter $\lambda$.
 
-Again, we test each value of $\lambda$ $n=10$ times,
+Again, we test each value of $\lambda$ ten times,
 and present the mean accuracies (with associated standard errors) below.
 
 \begin{center}
@@ -216,15 +217,58 @@ and present the mean accuracies (with associated standard errors) below.
 \end{center}
 Small values of $\lambda$ produced
 statistically insignificant improvement in validation accuracies;
-larger values saw significantly worse performance.
+larger values saw significantly worse performance
+in both training and validation accuracies.
 Thus, weight regularization
 is unlikely to be particularly helpful.
 
 
-
-
-
 \subsubsection{Data augmentation}
+
+We next enlarged our training dataset
+with transformed versions of the original training samples
+and trained on this augmented dataset.
+This new dataset was four times as large as the original,
+so we quadrupled the number of training steps
+when working with the augmented training data.
+
+We present our results as below.
+As before, we repeat training ten times
+and report means and standard errors.
+\begin{center}
+    \begin{tabular}{cc|cc}
+        Augmented & Steps & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
+        No  & 1500 & $100.00 \pm 0.00$ & $65.98 \pm 1.03$ \\
+%        No  & 6000 & $100.00 \pm 0.00$ & $66.21 \pm 0.86$ \\
+        Yes & 6000 & $100.00 \pm 0.00$ & $62.30 \pm 0.61$
+    \end{tabular}
+\end{center}
+
+Note that data augmentation actually lowered our validation accuracy.
+Indeed, using the augmented data with 6000 steps
+produced statistically significantly worse results
+than using the original training set with 1500 steps
+(Student's $t$-test, $p=0.0066$).
+
+
+%    Finished training. Total time taken: 741.599348783493
+%    Validation accuracies: [0.6091954,0.63218391,0.63218391,0.6091954,0.64367816,0.59770115,0.65517241,0.63218391,0.62068966,0.59770115]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 62.30% +- 0.61%
+%    You ran command: conv.py --repeat 10 --augmented --training_steps 6001
+
+%    Finished training. Total time taken: 591.5699789524078
+%    Validation accuracies: [ 0.68965517,0.68965517,0.66666667,0.65517241,0.68965517,0.6091954,0.64367816,0.66666667,0.67816092,0.63218391]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 66.21% +- 0.86%
+%    You ran command: conv.py --repeat 10 --training_steps 6001
+
+%    Finished training. Total time taken: 151.98044800758362
+%    Validation accuracies: [0.67816092,0.62068966,0.65517241,0.71264368,0.71264368,0.65517241,0.65517241,0.64367816,0.62068966,0.64367816]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 65.98% +- 1.03%
+%    You ran command: conv.py --repeat 10 --training_steps 1501
+
 
 \subsubsection{Early stopping}
 
