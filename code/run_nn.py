@@ -48,14 +48,14 @@ def relu(x):
 
 def relu_grad(x):
     """
-    returns a FUNCTION that finds the gradient of ReLU
-    at vector x, where we set the subgradient at 0 to 0
+    returns the gradient of ReLU at vector x, where we set 
+    the subgradient at 0 to 0
     """
     grad = []
     for xi in x:
         g = 1 if xi > 0 else 0
         grad.append(g)
-    return grad
+    return np.array(grad)
 
 def softmax(x):
     """
@@ -64,11 +64,20 @@ def softmax(x):
     e_x = np.exp(x - np.max(x)) # normalization
     return e_x / e_x.sum(axis = 0) # divide by magnitude
 
-def softmax_grad(yi):
+def softmax_grad(y, i):
     """
-    returns the gradient of softmax of yi w.r.t. z?
+    returns the gradient of softmax of y w.r.t. z?
     """
-    return yi * (1-yi)
+    n = len(y)
+    y = y.reshape(n, 1)
+    yt = y.reshape(1, n)
+    
+    grad = y.dot(yt)
+    
+    for i in range(n):
+        grad[i][i] = y[i] * (1 - y[i])
+    
+    return grad
 
 def cross_entropy(fz):
     """

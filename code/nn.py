@@ -22,20 +22,21 @@ def test_nn(X, y, weights, bias, activation_func, output_func, loss_func):
         softmax = activations[-1]
         
         error_func = loss_func(activations[-1])
-        loss = error_func(X[i])
+        loss = error_func(y[i])
         losses.append(loss)
         
-        guess = np.argmax(softmax) * 2 - 1 # adjust to -1, 1
+        guess = np.rint(softmax) # adjust to one-hot
         guesses.append(guess)
+        # print((softmax, guess))
                 
     correct = 0
     for i in range(len(guesses)):
-        if guesses[i] == y[i]:
+        if (guesses[i] == y[i]).all():
             correct += 1
             
     ratio = correct / len(X)
     print("Guessed {} correct out of {} ({})\n".format(correct, len(X), ratio))
-    print("Total loss {}\n".format(sum(losses)))
+    # print("Total loss {}\n".format(sum(losses)))
     
     return ratio
 
@@ -57,7 +58,7 @@ def train_nn(X, y, network_size, max_iterations,
     weights, bias = initialize(network_size) # jagged list
 
     n, d = X.shape
-    assert len(y.shape) == 1 # want 1-d vector ONLY
+    assert y.shape[0] == X.shape[0] # must line up
 
     time = 1
     while time <= max_iterations:
@@ -71,14 +72,17 @@ def train_nn(X, y, network_size, max_iterations,
         del_weights, del_bias = learn(xi, yi, weights, bias,
                 activation_func, activation_grad, 
                 output_grad, output_func, loss_grad)
+        # print("del weights {}\n del bias {}\n".format(del_weights, del_bias))
 
         # check sizes match, and update
         assert len(weights) == len(del_weights) == len(del_bias)
         for k in range(len(weights)):
             weights[k] = weights[k] - learning_rate * del_weights[k].T
             bias[k] = bias[k] - learning_rate * del_bias[k]
+            
+        weights, _ = initialize(network_size) # jagged list
         
-        # evaluate loss every 100 turns
+        # evaluate loss every 200 turns
         if time % 200 == 0:
             if terminate(X, y, weights, bias, activation_func, output_func, loss_func):
                 break
@@ -184,6 +188,7 @@ def forward_prop(xi, weights, bias, activation_func, output_func):
         activations.append(activation_func(z))
 
     # adjust for softmax
+    print(weighted_inputs[-1])
     activations[-1] = output_func(weighted_inputs[-1])
     return (weighted_inputs, activations)
 
@@ -203,16 +208,15 @@ def back_prop(z, yi, activations, weights,
     # initialize error
     deltas = deque()
     # set output layer error
-    last_delta = output_func(activations[-1]) - yi
+    last_delta = activations[-1] - yi
     deltas.append(last_delta)
 
-    # L-1 down to 2, shifted by -2 lol
+    # L-1 down to 2, shifted by -2
     for i in range(L-2, -1, -1):
         # most recently added should be leftmost
         
         # print("weights {}\n zi {}\n delta {}\n".format(z[i], weights[i+1], deltas[0]))
         delta = (activation_grad(z[i]) * weights[i + 1]).T.dot(deltas[0])
-        # deltas[i] = delta
         deltas.appendleft(delta)
 
     # print("deltas {}\n".format(deltas))
