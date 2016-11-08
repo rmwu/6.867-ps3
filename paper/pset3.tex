@@ -189,21 +189,40 @@ validation accuracies were slightly, but noticeably lower.
 
 \subsubsection{Weight regularization}
 
-%Mean training accuracy: 100.00% +- 0.00%
-%Mean validation accuracy: 66.55% +- 0.76%
-%You ran command: conv.py --repeat 10 --weight_penalty 0.03
-%
-%Mean training accuracy: 100.00% +- 0.00%
-%Mean validation accuracy: 65.40% +- 0.81%
-%You ran command: conv.py --repeat 10 --weight_penalty 0.1
-%
-%Mean training accuracy: 79.00% +- 2.33%
-%Mean validation accuracy: 52.64% +- 1.36%
-%You ran command: conv.py --repeat 10 --weight_penalty 0.3
-%
-%Mean training accuracy: 50.00% +- 0.00%
-%Mean validation accuracy: 37.70% +- 0.33%
-%You ran command: conv.py --repeat 10 --weight_penalty 1
+As we did previously,  % TODO check that this is mentioned in previous section
+we experimented with adding a regularization term
+to our training loss.
+In particular, we modify our softmax cross-entropy $\ell(w)$ as
+\begin{equation}
+    \ell(w) + \lambda\sum_i ||w\sind{i}||^2
+\end{equation}
+where we include an extra term:
+the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$,
+weighted by a regularization parameter $\lambda$.
+
+Again, we test each value of $\lambda$ $n=10$ times,
+and present the mean accuracies (with associated standard errors) below.
+
+\begin{center}
+    \begin{tabular}{c|cc}
+        $\lambda$ & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
+        0    & $100.00 \pm 0.00$ & $65.40 \pm 1.19$ \\
+        0.01 & $100.00 \pm 0.00$ & $66.44 \pm 1.15$ \\
+        0.03 & $100.00 \pm 0.00$ & $66.55 \pm 0.76$ \\
+        0.1  & $100.00 \pm 0.00$ & $65.40 \pm 0.81$ \\
+        0.3  &  $79.00 \pm 2.33$ & $52.64 \pm 1.36$ \\
+      % 1.0  &  $50.00 \pm 0.00$ & $37.70 \pm 0.33$ \\
+    \end{tabular}
+\end{center}
+Small values of $\lambda$ produced
+statistically insignificant improvement in validation accuracies;
+larger values saw significantly worse performance.
+Thus, weight regularization
+is unlikely to be particularly helpful.
+
+
+
+
 
 \subsubsection{Data augmentation}
 
