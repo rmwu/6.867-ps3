@@ -8,6 +8,7 @@ from six.moves import cPickle as pickle
 
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy.stats
 
 
@@ -23,7 +24,8 @@ class ArtistConvNet:
                  dropout_frac,
                  weight_penalty,
                  pooling_params,
-                 training_data_file):
+                 training_data_file,
+                 plot_progress):
         '''
         Initialize the class by loading the required datasets
         and building the graph.
@@ -34,6 +36,7 @@ class ArtistConvNet:
         self.dropout_frac = dropout_frac
         self.weight_penalty = weight_penalty
         self.pooling_params = pooling_params
+        self.plot_progress = plot_progress
         if invariance:
             self.load_invariance_datasets()
         self.graph = tf.Graph()
@@ -160,6 +163,9 @@ class ArtistConvNet:
                     
                     batch_train_accuracy = 0
                     validation_accuracy = 0
+                    train_accuracies = []
+                    valid_accuracies = []
+
                     for step in range(num_steps):
                         offset = (step * batch_size) % (self.train_Y.shape[0] - batch_size)
                         batch_data = self.train_X[offset:(offset + batch_size), :, :, :]
@@ -170,6 +176,11 @@ class ArtistConvNet:
                                      dropout_keep_prob: dropout_prob}
                         _, l, predictions = session.run([optimizer, loss, train_prediction],
                                                         feed_dict=feed_dict)
+
+                        if self.plot_progress:
+                            val_preds = session.run(valid_prediction, feed_dict={dropout_keep_prob : 1.0})
+                            valid_accuracies.append(accuracy(val_preds, self.val_Y))
+
                         if (step % 100 == 0):
                             val_preds = session.run(valid_prediction, feed_dict={dropout_keep_prob : 1.0})
                             batch_train_accuracy = accuracy(predictions, batch_labels)
@@ -178,6 +189,9 @@ class ArtistConvNet:
                             print('Batch loss at step {:d}: {:f}'.format(step, l))
                             print('Batch training accuracy: {:.2%}'.format(batch_train_accuracy))
                             print('Validation accuracy: {:.2%}'.format(validation_accuracy))
+
+                    if self.plot_progress:
+                        plt.plot(range(num_steps), valid_accuracies, color="cornflowerblue", linewidth=0.5)
                     
                     # This code is for the final question
                     if self.invariance:
@@ -261,6 +275,10 @@ if __name__ == '__main__':
                         help="Use the augmented dataset.")
     parser.add_argument("--training_steps", type=int, default=1501,
                         help="Number of steps to train our conv net.")
+    parser.add_argument("--plot_progress",
+                        help="Location to save plot of validation error over training. "
+                             "Do not include the file extension. "
+                             "Don't use with repeat > 1.")
 
     args = parser.parse_args()
 
@@ -285,13 +303,30 @@ if __name__ == '__main__':
                                  pooling_params={"pooling": args.pooling,
                                                  "filter_size": args.pool_filter_size,
                                                  "stride": args.pool_stride},
-                                 training_data_file=data_path)
+                                 training_data_file=data_path,
+                                 plot_progress=args.plot_progress)
         return conv_net.train_model()
 
     t1 = time.time()
     accuracies = np.array([train_single_conv_net(i) for i in range(args.repeat)])
     t2 = time.time()
     print("Finished training. Total time taken: {}".format(t2 - t1))
+
+    if args.plot_progress:
+        plt.title("Validation accuracy during training")
+        plt.xlabel("Training steps")
+        plt.ylabel("Validation accuracy")
+
+        # directory might not exist
+        fig_dir, fig_name = os.path.split(args.plot_progress)
+        if not os.path.exists(fig_dir):
+            os.makedirs(fig_dir)
+
+        # with open(os.path.join(fig_dir, fig_name + "-data.pickle"), 'w') as f:
+            # pickle.dump((plt.xdata, plt.ydata), f)
+
+        plt.savefig(args.plot_progress + ".pdf", format="pdf")
+        plt.show()
 
     if args.repeat > 1:
         train_acc_mean, val_acc_mean = np.mean(accuracies, axis=0)
