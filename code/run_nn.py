@@ -64,12 +64,11 @@ def softmax(x):
     e_x = np.exp(x - np.max(x)) # normalization
     return e_x / e_x.sum(axis = 0) # divide by magnitude
 
-def softmax_grad(x):
+def softmax_grad(yi):
     """
-    returns the gradient of softmax of vector x with respect to IDK
+    returns the gradient of softmax of yi w.r.t. z?
     """
-    # TODO
-    return x
+    return yi * (1-yi)
 
 def cross_entropy(fz):
     """
@@ -86,7 +85,7 @@ def cross_entropy(fz):
         tot_loss = 0
         for i in range(len(x)):
             tot_loss += x[i] * math.log(fz[i])
-        return tot_loss
+        return -tot_loss
     return lambda x : loss(x, fz)
 
 def cross_entropy_grad(fz):

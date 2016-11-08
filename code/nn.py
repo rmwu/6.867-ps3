@@ -33,12 +33,15 @@ def test_nn(X, y, weights, bias, activation_func, output_func, loss_func):
         if guesses[i] == y[i]:
             correct += 1
             
-    print("Guessed {} correct out of {} ({})\n".format(correct, len(X), correct / len(X)))
+    ratio = correct / len(X)
+    print("Guessed {} correct out of {} ({})\n".format(correct, len(X), ratio))
     print("Total loss {}\n".format(sum(losses)))
+    
+    return ratio
 
 def train_nn(X, y, network_size, max_iterations,
           activation_func, activation_grad, 
-          output_grad, output_func, loss_grad):
+          output_grad, output_func, loss_grad, loss_func):
     """
     X       n by d input data
     y       n by 1 data labels
@@ -75,10 +78,21 @@ def train_nn(X, y, network_size, max_iterations,
             weights[k] = weights[k] - learning_rate * del_weights[k].T
             bias[k] = bias[k] - learning_rate * del_bias[k]
         
+        # evaluate loss every 100 turns
+        if time % 200 == 0:
+            if terminate(X, y, weights, bias, activation_func, output_func, loss_func):
+                break
+        
         # gg don't forget to increment this...
         time += 1
 
     return (weights, bias)
+
+def terminate(X, y, weights, bias, activation_func, output_func, loss_func):
+    success = test_nn(X, y, weights, bias, activation_func, output_func, loss_func)
+    if success > 0.9:
+        return True
+    return False
 
 def initialize(network_size):
     """
