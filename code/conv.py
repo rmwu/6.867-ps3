@@ -1,3 +1,4 @@
+import os
 import sys
 import math
 import time
@@ -11,20 +12,25 @@ import scipy.stats
 
 
 DATA_PATH = 'art_data/'
-DATA_FILE = DATA_PATH + 'art_data.pickle'
 IMAGE_SIZE = 50
 NUM_CHANNELS = 3
 NUM_LABELS = 11
 INCLUDE_TEST_SET = False
 
 class ArtistConvNet:
-    def __init__(self, invariance, dropout_frac, weight_penalty, pooling_params):
+    def __init__(self, invariance,
+                 num_training_steps,
+                 dropout_frac,
+                 weight_penalty,
+                 pooling_params,
+                 training_data_file):
         '''
         Initialize the class by loading the required datasets
         and building the graph.
         '''
-        self.load_pickled_dataset(DATA_FILE)
+        self.load_pickled_dataset(training_data_file)
         self.invariance = invariance
+        self.num_training_steps = num_training_steps
         self.dropout_frac = dropout_frac
         self.weight_penalty = weight_penalty
         self.pooling_params = pooling_params
@@ -47,7 +53,7 @@ class ArtistConvNet:
         layer2_stride = 2
         layer3_num_hidden = 64
         layer4_num_hidden = 64
-        num_training_steps = 1501
+        num_training_steps = self.num_training_steps
 
         # Add max pooling
         pooling = self.pooling_params["pooling"]
@@ -251,30 +257,47 @@ if __name__ == '__main__':
     parser.add_argument("--weight_penalty", type=float, default=0.0,
                         help="Regularization parameter; "
                              "coefficient on Frobenius weight matrix norms in loss.")
+    parser.add_argument("--augmented", action="store_true",
+                        help="Use the augmented dataset.")
+    parser.add_argument("--training_steps", type=int, default=1501,
+                        help="Number of steps to train our conv net.")
 
     args = parser.parse_args()
+
+    if args.augmented and args.training_steps <= 6000:
+        print("Using <= 6000 training steps on augmented data. "
+              "The augmented dataset is four times as large as the regular one, "
+              "so you should use proportionally more steps.")
+
     invariance = args.invariance
     if invariance:
         print("Testing finished model on invariance datasets!")
     
+    data_filename = 'augmented_art_data.pickle' if args.augmented else "art_data.pickle"
+    data_path = os.path.join(DATA_PATH, data_filename)
 
-    def train_single_conv_net():
+    def train_single_conv_net(iteration):
+        print("\nTraining model #{}".format(iteration))
         conv_net = ArtistConvNet(invariance=invariance,
+                                 num_training_steps=args.training_steps,
                                  dropout_frac=args.dropout,
                                  weight_penalty=args.weight_penalty,
                                  pooling_params={"pooling": args.pooling,
                                                  "filter_size": args.pool_filter_size,
-                                                 "stride": args.pool_stride})
+                                                 "stride": args.pool_stride},
+                                 training_data_file=data_path)
         return conv_net.train_model()
 
     t1 = time.time()
-    accuracies = np.array([train_single_conv_net() for i in range(args.repeat)])
+    accuracies = np.array([train_single_conv_net(i) for i in range(args.repeat)])
     t2 = time.time()
     print("Finished training. Total time taken: {}".format(t2 - t1))
 
     if args.repeat > 1:
         train_acc_mean, val_acc_mean = np.mean(accuracies, axis=0)
         train_acc_sem, val_acc_sem = scipy.stats.sem(accuracies)
+        print("Training accuracies: {}".format(accuracies.T[0]))
+        print("Validation accuracies: {}".format(accuracies.T[1]))
         print("Mean training accuracy: {:.2%} +- {:.2%}".format(train_acc_mean, train_acc_sem))
         print("Mean validation accuracy: {:.2%} +- {:.2%}".format(val_acc_mean, val_acc_sem))
 
