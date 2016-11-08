@@ -191,7 +191,7 @@ class ArtistConvNet:
                             print('Validation accuracy: {:.2%}'.format(validation_accuracy))
 
                     if self.plot_progress:
-                        plt.plot(range(num_steps), valid_accuracies, color="cornflowerblue", linewidth=1.0)
+                        plt.plot(range(num_steps), valid_accuracies, color="cornflowerblue", linewidth=0.5)
                     
                     # This code is for the final question
                     if self.invariance:
