@@ -272,7 +272,24 @@ than using the original training set with 1500 steps
 
 \subsubsection{Early stopping}
 
+Finally, we consider early stopping as a means of regularization.
+We monitored the validation error
+of our model each time we trained it;
+we show a representative plot in Figure~\ref{fig:2-4-4-validation-acc}.
 
+\begin{figure*}[t]
+   \centering
+   \includegraphics[width=4in]{img/2-4-4-validation-acc.pdf}
+   \caption{Validation error of our convolutional network during training.}
+   \label{fig:2-4-4-validation-acc}
+\end{figure*}
+
+After around 700 training steps,
+validation accuracy fails to improve further.
+We note, however, that validation accuracy does not \emph{decrease}
+as we continue to train our model,
+suggesting that overfitting (if it is occurring at all)
+is not negatively impacting our results.
 
 
 
