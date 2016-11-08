@@ -107,6 +107,15 @@ def cross_entropy_grad(fz):
     """
     return lambda y : fz - y # or the other way around
 
+def onehot(y, n):
+    """
+    y      class label, indexed from 0
+    n      number of dimensions
+    """
+    vector = np.zeros(n)
+    vector[y] = 1
+    return vector
+
 ##################################
 # Command line
 ##################################

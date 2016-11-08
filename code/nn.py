@@ -35,10 +35,10 @@ def test_nn(X, y, weights, bias, activation_func, output_func, loss_func):
             correct += 1
             
     ratio = correct / len(X)
-    print("Guessed {} correct out of {} ({})\n".format(correct, len(X), ratio))
-    # print("Total loss {}\n".format(sum(losses)))
+    loss = np.mean(losses)
     
-    return ratio
+    print("Guessed {} correct out of {} ({})\nAverage loss {}\n".format(correct, len(X), ratio, loss))
+    return (loss, ratio)
 
 def train_nn(X, y, network_size, max_iterations,
           activation_func, activation_grad, 
@@ -61,14 +61,13 @@ def train_nn(X, y, network_size, max_iterations,
     assert y.shape[0] == X.shape[0] # must line up
 
     time = 1
+    last_loss = 0
+    
     while time <= max_iterations:
         i = np.random.randint(0, n) # choose random sample
         xi, yi = X[i], y[i]
         
-        # print("Training on x = {} and y = {}\n".format(xi, yi))
-
-        learning_rate = 1 / time # decaying learning rate
-        
+        # print("Training on x = {} and y = {}\n".format(xi, yi))        
         learning_rate = 0.01
         
         # jagged list, same dimensions as weights
@@ -85,10 +84,12 @@ def train_nn(X, y, network_size, max_iterations,
             
         # weights, _ = initialize(network_size) # try just making it random again
         
-        # evaluate loss every 200 turns
-        if time % 100 == 0:
+        # evaluate loss every 500 turns
+        if time % 500 == 0:
             # print((np.linalg.norm(del_weights[0]), np.linalg.norm(del_bias[0])))
-            if terminate(X, y, weights, bias, activation_func, output_func, loss_func):
+            last_loss, end = terminate(X, y, weights, bias, last_loss,
+                         activation_func, output_func, loss_func)
+            if end:
                 break
         
         # gg don't forget to increment this...
@@ -97,11 +98,14 @@ def train_nn(X, y, network_size, max_iterations,
     print("Ran for {} iterations.".format(time))
     return (weights, bias)
 
-def terminate(X, y, weights, bias, activation_func, output_func, loss_func):
-    success = test_nn(X, y, weights, bias, activation_func, output_func, loss_func)
-    if success > 0.95:
-        return True
-    return False
+def terminate(X, y, weights, bias, last_loss,
+              activation_func, output_func, loss_func):
+    loss, ratio = test_nn(X, y, weights, bias, activation_func, output_func, loss_func)
+    if ratio > 0.99:
+        return (loss, True)
+    if abs(last_loss - loss) < 0.0001:
+        return (loss, True)
+    return (loss, False)
 
 def initialize(network_size):
     """
