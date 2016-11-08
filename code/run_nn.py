@@ -86,7 +86,8 @@ def cross_entropy(fz):
 
         \sum_i {y_i \log{f(z)_i}}
 
-    where f(z) is the output layer output 
+    where x is a MATRIX
+    and f(z) is the output layer output 
     """
     def loss(x, fz):
         assert len(x) == len(fz)
@@ -102,6 +103,7 @@ def cross_entropy_grad(fz):
     returns a FUNCTION for the cross entropy gradient for point (x, y),
     which would be
         [ - y_i / fz_i ] for y_i \in y
+    where y_i is a VECTOR
     """
     return lambda y : fz - y # or the other way around
 

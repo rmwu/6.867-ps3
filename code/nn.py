@@ -67,7 +67,10 @@ def train_nn(X, y, network_size, max_iterations,
         
         # print("Training on x = {} and y = {}\n".format(xi, yi))
 
-        learning_rate = 1 / time**2 # decaying learning rate
+        learning_rate = 1 / time # decaying learning rate
+        
+        learning_rate = 0.01
+        
         # jagged list, same dimensions as weights
         del_weights, del_bias = learn(xi, yi, weights, bias,
                 activation_func, activation_grad, 
@@ -80,21 +83,23 @@ def train_nn(X, y, network_size, max_iterations,
             weights[k] = weights[k] - learning_rate * del_weights[k].T
             bias[k] = bias[k] - learning_rate * del_bias[k]
             
-        weights, _ = initialize(network_size) # jagged list
+        # weights, _ = initialize(network_size) # try just making it random again
         
         # evaluate loss every 200 turns
-        if time % 200 == 0:
+        if time % 100 == 0:
+            # print((np.linalg.norm(del_weights[0]), np.linalg.norm(del_bias[0])))
             if terminate(X, y, weights, bias, activation_func, output_func, loss_func):
                 break
         
         # gg don't forget to increment this...
         time += 1
 
+    print("Ran for {} iterations.".format(time))
     return (weights, bias)
 
 def terminate(X, y, weights, bias, activation_func, output_func, loss_func):
     success = test_nn(X, y, weights, bias, activation_func, output_func, loss_func)
-    if success > 0.9:
+    if success > 0.95:
         return True
     return False
 
@@ -188,7 +193,7 @@ def forward_prop(xi, weights, bias, activation_func, output_func):
         activations.append(activation_func(z))
 
     # adjust for softmax
-    print(weighted_inputs[-1])
+    # print(weighted_inputs[-1])
     activations[-1] = output_func(weighted_inputs[-1])
     return (weighted_inputs, activations)
 
