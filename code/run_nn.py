@@ -31,47 +31,10 @@ def main():
 
     # neural network construction
     network_size = [2, 3] # list containing nodes per hidden layer
-    weights = train(X, y, network_size, iterations, relu, relu_grad, softmax_grad)
+    weights = train_nn(X, y, network_size, iterations, relu, relu_grad, softmax_grad, cross_entropy_grad)
     
     print("Converged to weight vector {} after {} iterations".format(weights, iterations))
     return weights
-
-def train(X, y, network_size, max_iterations,
-          activation_func, activation_grad, output_func):
-    """
-    X       n by d input data
-    y       n by 1 data labels
-
-    network_size    list containing number of nodes per layer, including
-                    the input layer's size, excluding output layer
-    max_iterations  maximum number of iterations
-
-    activation_func activation function for hidden layers
-    activation_grad activation gradient for hidden layers
-    output_grad     activation gradient for output layer
-    """
-    weights, bias = initialize(network_size) # jagged list
-
-    n, d = X.shape
-    assert len(y.shape) == 1 # want 1-d vector ONLY
-
-    time = 0
-    while time < max_iterations:
-        i = np.random.randint(0, n) # choose random sample
-        xi, yi = X[i], y[i]
-
-        learning_rate = 1 / time**2 # decaying learning rate
-        # jagged list, same dimensions as weights
-        del_weights, del_bias = learn(xi, yi, weights, bias
-                    activation_func, acivation_grad, output_grad)
-
-        # check sizes match, and update
-        assert len(weights) == len(del_weights) == len(del_bias)
-        for k in range(len(weights)):
-            weights[k] = weights[k] - learning_rate * del_weights[k]
-            bias[k] = bias[k] - learning_rate * del_bias[k]
-
-    return (weights, bias)
 
 ##################################
 # Mathematical implementations
@@ -81,31 +44,29 @@ def relu(x):
     """
     returns the ReLU of vector x, which is d by 1
     """
-    return np.maximum(x, 0, x)
+    return np.maximum(x, 0)
 
-def relu_grad():
+def relu_grad(x):
     """
     returns a FUNCTION that finds the gradient of ReLU
     at vector x, where we set the subgradient at 0 to 0
     """
-    def gradient(x):
-        grad = []
-        for xi in x:
-            g = 1 if x > 0 else 0
-            grad.append(g)
-        return grad
-    return np.vectorize(gradient)
+    grad = []
+    for xi in x:
+        g = 1 if xi > 0 else 0
+        grad.append(g)
+    return grad
 
 def softmax(x):
     """
     returns the softmax of vector x
     """
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum(axis = 0)
+    e_x = np.exp(x - np.max(x)) # normalization
+    return e_x / e_x.sum(axis = 0) # divide by magnitude
 
 def softmax_grad(x):
     """
-    returns the softmax of vector x
+    returns the gradient of softmax of vector x with respect to IDK
     """
     # TODO
     return x
@@ -120,10 +81,13 @@ def cross_entropy(fz):
     where f(z) is the output layer output 
     """
     def loss(x, fz):
-        return sum([x_i + math.log(fz_i)
-                for x_i, fz_i in list(zip(x, fz))])
-
-    return lambda x : np.vectorize(loss)(x, fz)
+        assert len(x) == len(fz)
+        
+        tot_loss = 0
+        for i in range(len(x)):
+            tot_loss += x[i] * math.log(fz[i])
+        return tot_loss
+    return lambda x : loss(x, fz)
 
 def cross_entropy_grad(fz):
     """
@@ -131,7 +95,7 @@ def cross_entropy_grad(fz):
     which would be
         [ - y_i / fz_i ] for y_i \in y
     """
-    return lambda x : - x / fz
+    return lambda y : fz - y # or the other way around
 
 ##################################
 # Command line
