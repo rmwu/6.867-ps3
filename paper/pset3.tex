@@ -132,8 +132,8 @@ into 400 training, 200 validation, and 200 testing samples.
 A possible topology for this neural network is drawn in Figure \ref{fig:samplenn}.
 We noticed that neural network  performance was very sensitive to 
 variations in weight initialization and step size.
-For example, when we tried a decaying step size of $1/t$, the neural network
-converged to predicting only a single value for every given input.
+For example, bad step sizes often resulted in
+the neural network's predicting only a single value for every given input.
 
 \subsection{Initialization}
 
@@ -240,8 +240,7 @@ target vector of $[0,0,0,0,0,0,0,0,0,1]$.
 We selected 400 training, 200 validation, and 200 testing samples per class.
 
 As in Section \ref{sec:binary}, we determined the termination criteria as
-when the classification accuracy on the validation set exceeded 0.99,
-or when the change in objective function (cross-entropy loss on Softmax output)
+when the change in objective function (cross-entropy loss on Softmax output)
 dropped below a constant threshold, 0.001 (checked every 200 epochs).
 
 \subsubsection{Architecture variations}
@@ -261,28 +260,64 @@ hidden layers & accuracy	& epochs & $\eta$ \\\hline
 \end{tabular}
 \end{center}
 
-%[20, 20]
-%Ran for 200001 iterations.
-%Guessed 1843 correct out of 2000 (0.9215)
-%Average loss 0.537023668884212
 
-%[100]
-%Ran for 152500 iterations.
-%Guessed 1889 correct out of 2000 (0.9445)
-%Average loss 0.43865500872982616
 
-%[100, 100]
-%Ran for 104500 iterations.
-%Guessed 1901 correct out of 2000 (0.9505)
-%Average loss 0.3172982679689496
+% 4,9 [100]
+%Ran for 16500 iterations.
+%Guessed 381 correct out of 400 (0.9525)
+%Average loss 0.12142020187035087
+
+% 4,9 [100,100]
+%Ran for 18000 iterations.
+%Guessed 381 correct out of 400 (0.9525)
+%Average loss 0.20364621990226375
+
+% 3,5 [100]
+%Ran for 10000 iterations.
+%Guessed 388 correct out of 400 (0.97)
+%Average loss 0.09079234230339693
+
+% 3,5 [100, 100]
+%Ran for 13000 iterations.
+%Guessed 389 correct out of 400 (0.9725)
+%Average loss 0.11671382468804836
+
+% 1,7 [20, 20]
+%Ran for 6500 iterations.
+%Guessed 394 correct out of 400 (0.985)
+%Average loss 0.044168742106228315
+
+% 1,7 [100]
+%Ran for 2000 iterations.
+%Guessed 397 correct out of 400 (0.9925)
+%Average loss 0.03602293463505232
+
+% 1,7 [100, 100]
+%Ran for 5500 iterations.
+%Guessed 398 correct out of 400 (0.995)
+%Average loss 0.029611779980850093
 
 % % % % % % % % % %
 %    PROBLEM 2
 % % % % % % % % % %
 
-In addition to $k$-class classification of individual digits, we also
-used our neural network for binary classification of digit pairs,
-to compare with other classification methods.
+In addition to $k$-class classification of individual digits,
+we also used our neural network for binary classification of digit pairs,
+to compare with other binary classification methods
+(including logistic regression, a linear SVM,
+and a SVM with a Gaussian RBF kernel).
+For the neural network, we used two 100-node hidden layers,
+and the results are below.
+
+\begin{center}
+\begin{tabular}{c|c|c|c|c}
+problem		& NN	& LR		& linear SVM	& RBF kernel \\\hline
+        1, 7		& 0.995 	& 0.99 	& 0.986		& 0.986 \\
+        3, 5		& 0.9725 	& 0.94 	& 0.946		& 0.983 \\
+        4, 9		& 0.9525 	& 0.96 	& 0.943 		& 0.946 \\
+\end{tabular}
+\end{center}
+The neural network had similar accuracy as the methods under comparison.
 
 \section{Convolutional Neural Networks}
 

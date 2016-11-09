@@ -10,7 +10,7 @@ def load_digit(digit):
     
     return raw_data
 
-def get_data(total):
+def get_data(total, digits = None):
     """
     given a list of positive and negative numbers, returns
     a tuple (X, y) containing dictionaries of train, validate,
@@ -34,8 +34,11 @@ def get_data(total):
     n_train = total // 2;
     n_validate = n_train + total // 4;
     
-    # digits 0 to 9, inclusive
-    for digit in range(10):
+    # digits 0 to 9, inclusive, if no choices provided
+    if digits is None:
+        digits = range(10)
+        
+    for digit in digits:
         raw_data = load_digit(digit) # huge dataset
         
         # load in training data for this digit
