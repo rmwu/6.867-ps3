@@ -2,10 +2,27 @@ import numpy as np
 import math
 from collections import deque
 
-def test_nn(X, y, weights, bias, activation_func, output_func, loss_func):
+def binary_predict(weights, bias, activation_func, output_func, loss_func):
+    """
+    binary_predict produces a score centered at 0.5 for one of two
+    BINARY CLASSES.
+
+    X       d by 1 input vector
+    """
+    def predict(X, weights, bias, activation_func, output_func, loss_func):
+        _, activations = forward_prop(X, weights, bias, activation_func, output_func)
+        softmax = activations[-1]
+
+        # assert len(softmax) == 2
+        return softmax[1] # (softmax[1]-0.5)*2
+    
+    return lambda X : predict(X, weights, bias, activation_func, output_func, loss_func)
+
+def test_nn(X, y, weights, bias, activation_func, output_func, loss_func,
+           loud = False):
     """
     X       n by d input data
-    y       n by 1 data labels
+    y       n by d_out data labels
     
     weights         jagged weight array for all layers from 2 to L
     bias            bias vector for all layers from 2 to L, length L-1
@@ -35,10 +52,12 @@ def test_nn(X, y, weights, bias, activation_func, output_func, loss_func):
             correct += 1
             
     ratio = correct / len(X)
-    print("Guessed {} correct out of {} ({})\n".format(correct, len(X), ratio))
-    # print("Total loss {}\n".format(sum(losses)))
+    loss = np.mean(losses)
     
-    return ratio
+    if loud:
+        print("Guessed {} correct out of {} ({})\nAverage loss {}\n".format(correct, len(X), ratio, loss))
+    # print((guesses, y))
+    return (loss, ratio, correct, len(X))
 
 def train_nn(X, y, network_size, max_iterations,
           activation_func, activation_grad, 
@@ -61,14 +80,13 @@ def train_nn(X, y, network_size, max_iterations,
     assert y.shape[0] == X.shape[0] # must line up
 
     time = 1
+    last_loss = 0
+    
     while time <= max_iterations:
         i = np.random.randint(0, n) # choose random sample
         xi, yi = X[i], y[i]
         
-        # print("Training on x = {} and y = {}\n".format(xi, yi))
-
-        learning_rate = 1 / time # decaying learning rate
-        
+        # print("Training on x = {} and y = {}\n".format(xi, yi))        
         learning_rate = 0.01
         
         # jagged list, same dimensions as weights
@@ -85,10 +103,12 @@ def train_nn(X, y, network_size, max_iterations,
             
         # weights, _ = initialize(network_size) # try just making it random again
         
-        # evaluate loss every 200 turns
-        if time % 100 == 0:
+        # evaluate loss every 100 turns
+        if time % 500 == 0:
             # print((np.linalg.norm(del_weights[0]), np.linalg.norm(del_bias[0])))
-            if terminate(X, y, weights, bias, activation_func, output_func, loss_func):
+            last_loss, end = terminate(X, y, weights, bias, last_loss,
+                         activation_func, output_func, loss_func)
+            if end:
                 break
         
         # gg don't forget to increment this...
@@ -97,11 +117,14 @@ def train_nn(X, y, network_size, max_iterations,
     print("Ran for {} iterations.".format(time))
     return (weights, bias)
 
-def terminate(X, y, weights, bias, activation_func, output_func, loss_func):
-    success = test_nn(X, y, weights, bias, activation_func, output_func, loss_func)
-    if success > 0.95:
-        return True
-    return False
+def terminate(X, y, weights, bias, last_loss,
+              activation_func, output_func, loss_func):
+    loss, ratio,_,_ = test_nn(X, y, weights, bias, activation_func, output_func, loss_func)
+    if ratio > 0.999:
+        return (loss, True)
+    if abs(last_loss - loss) < 0.0001:
+        return (loss, True)
+    return (loss, False)
 
 def initialize(network_size):
     """
