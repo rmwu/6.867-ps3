@@ -48,14 +48,14 @@ def relu(x):
 
 def relu_grad(x):
     """
-    returns a FUNCTION that finds the gradient of ReLU
-    at vector x, where we set the subgradient at 0 to 0
+    returns the gradient of ReLU at vector x, where we set 
+    the subgradient at 0 to 0
     """
     grad = []
     for xi in x:
         g = 1 if xi > 0 else 0
         grad.append(g)
-    return grad
+    return np.array(grad)
 
 def softmax(x):
     """
@@ -64,12 +64,20 @@ def softmax(x):
     e_x = np.exp(x - np.max(x)) # normalization
     return e_x / e_x.sum(axis = 0) # divide by magnitude
 
-def softmax_grad(x):
+def softmax_grad(y, i):
     """
-    returns the gradient of softmax of vector x with respect to IDK
+    returns the gradient of softmax of y w.r.t. z?
     """
-    # TODO
-    return x
+    n = len(y)
+    y = y.reshape(n, 1)
+    yt = y.reshape(1, n)
+    
+    grad = y.dot(yt)
+    
+    for i in range(n):
+        grad[i][i] = y[i] * (1 - y[i])
+    
+    return grad
 
 def cross_entropy(fz):
     """
@@ -78,7 +86,8 @@ def cross_entropy(fz):
 
         \sum_i {y_i \log{f(z)_i}}
 
-    where f(z) is the output layer output 
+    where x is a MATRIX
+    and f(z) is the output layer output 
     """
     def loss(x, fz):
         assert len(x) == len(fz)
@@ -86,7 +95,7 @@ def cross_entropy(fz):
         tot_loss = 0
         for i in range(len(x)):
             tot_loss += x[i] * math.log(fz[i])
-        return tot_loss
+        return -tot_loss
     return lambda x : loss(x, fz)
 
 def cross_entropy_grad(fz):
@@ -94,6 +103,7 @@ def cross_entropy_grad(fz):
     returns a FUNCTION for the cross entropy gradient for point (x, y),
     which would be
         [ - y_i / fz_i ] for y_i \in y
+    where y_i is a VECTOR
     """
     return lambda y : fz - y # or the other way around
 

@@ -37,6 +37,104 @@
 \section{Neural Networks}
 \label{sec:nn}
 
+We implemented a traditional, fully-connected neural network, with
+number of hidden layers and nodes per layer specified by the user.
+We trained the neural network through stochastic gradient descent on
+our data, where the stochastic gradients are calculated by the
+backpropogation algorithm.
+
+All hidden units were implemented as ReLU units, whose activation functions
+are defined as
+\begin{equation}f(z) = \max(0, z).\end{equation}
+The output layer was implemented as a Softmax layer for $k$ classes,
+which is intuitively similar to a multi-dimensional sigmoid. Its activation function
+is given as the vector $f(z)$ where
+\begin{equation}
+f(z)_i = \f{e^{z_i}}{\sum_{j=1}^{k}{e^{z_j}}} \tx{ for } i = 1,\dots,k.
+\end{equation}
+We took target vectors of ``one-hot'' (1-of-k) vectors, whose loss we measured
+with cross-entropy. For a given training point $(x,y)$, the loss is
+\begin{equation}
+l = \sum_{i = 1}^k{y_i \log(f(z)_i)}
+\end{equation}
+where $f(z)$ is defined above as the Softmax output.
+In the backpropogation algorithm, we calculated the output layer loss using the
+cross-entropy of the Softmax function,
+\begin{equation}\delta^L = f'(z^L)\circ\nabla_{a^L}l = f(z^L) - y\end{equation}
+where $\circ$ is element-wise multiplication, $f(z^L)$ is the Softmax output,
+and $y$ is the target vector. This cross-entropy loss is propogated through the 
+loss calculations for the hidden layers, which utilize the ReLU gradient instead.
+
+\subsection{Initialization}
+
+Since ReLU is a not fully differentiable, we set the subgradient at 0 to 0.
+As a result, we cannot simply initialize weights to 0, else all gradients and activations 
+will not be updated during training. Instead, we initialize weights randomly,
+with values drawn from a Gaussian centered at 0, with standard deviation $1/\sqrt{m}$
+for a weight matrix of size $m$ by $n$.
+
+If all units were sigmoids, rather than ReLUs, then this initialization method would 
+be reasonable since... % TODO
+
+\subsection{Regularization}
+
+To avoid overfitting, we can add a penalty term to our loss function for regularization.
+Our loss would thus become
+\begin{equation}J(w) = l(w) + \lambda(||w^{(1)}||^2_F + ||w^{(2)}||^2_F)
+\end{equation}
+where $||w|| = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
+
+\subsection{Binary classification}
+
+We tested our implementation against 2D artificial datasets.
+The first three contained 400 training samples,
+200 validation samples,
+and 200 testing samples, and fourth contained 
+400 training, validation, and testing samples.
+The data consisted of two-dimensional vectors $x\sind{i}$ labeled by $y\sind{i} = \pm1$.
+To compare the target values against our Softmax outputs, we mapped $\pm1$ to
+one-hot vectors $[1,0]$ and $[0,1]$.
+
+We trained our neural network with stochastic gradient descent, with a 
+decaying stepsize, $\eta = 1/t$. Stochastic gradient descent terminated when
+the cross-entropy loss on our validation set dropped below a constant threshold.
+This loss was calculated once every 100 epochs.
+
+% TODO actually get reliable results from this
+% TODO nice images
+
+\subsubsection{Architecture variations}
+
+We investigated different architectures for the neural network, including
+\begin{enumerate}
+\item 1 small hidden layer (5 nodes)
+\item 1 large hidden layer (20 nodes)
+\item 2 small hidden layers (5 nodes each)
+\item 2 large hidden layers (20 nodes each)
+\end{enumerate}
+
+We compared our neural network's performance to that of a kernelized
+Gaussian RBG SVM classifier and observed similar performance in accuracy.
+
+\subsection{MNIST multi-class classification}
+
+We also used our neural network to perform multi-class classification of the
+MNIST dataset. These data consist $28\times 28$ grayscale images of handwritten
+digits, 0 to 9, given as a labeled dataset of $28^2$ dimensional vectors
+with integer entries $[0,255]$ representing the grayscale luminescence of each pixel.
+
+We normalized input pixel features to the range $[-1, 1]$,
+so that an input vector $x$ is mapped to $\f{2x}{255}-1$,
+with all operations applied componentwise. Normalization significantly
+improved prediction accuracy. Class labels were mapped to one-hot vector 
+representations. For example, an image labeled as 9 would have a 
+target vector of $[0,0,0,0,0,0,0,0,0,1]$.
+We selected 300 training, 150 validation, and 150 testing samples per class.
+
+% % % % % % % % % %
+%    PROBLEM 2
+% % % % % % % % % %
+
 \section{Convolutional Neural Networks}
 
 % TODO connect from previous section
