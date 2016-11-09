@@ -203,7 +203,7 @@ This loss was calculated once every 100 epochs.
 % TODO nice images
 
 \subsubsection{Architecture variations}
-\label{sec:binaryarch}
+\label{subsubsec:binaryarch}
 We investigated different architectures for the neural network, including
 \begin{enumerate}
 \item 1 small hidden layer (5 nodes)
@@ -230,14 +230,14 @@ representations. For example, an image labeled 9 would have a
 target vector of $[0,0,0,0,0,0,0,0,0,1]$.
 We selected 400 training, 200 validation, and 200 testing samples per class.
 
-As in Section \ref{sec:binary}, we determined the termination criteria as
+As in Section \ref{subsec:binary}, we determined the termination criteria as
 when the classification accuracy on the validation set exceeded 0.99,
 or when the change in objective function (cross-entropy loss on Softmax output)
 dropped below a constant threshold, 0.001 (checked every 200 epochs).
 
 \subsubsection{Architecture variations}
 
-We classified our data with the same architectures enumerated in Section \ref{sec:binaryarch}.
+We classified our data with the same architectures enumerated in Section \ref{subsubsec:binaryarch}.
 
 % % % % % % % % % %
 %    PROBLEM 2
