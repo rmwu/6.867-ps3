@@ -94,58 +94,74 @@
         \node[annot,above of=H-1, node distance=1cm] (hl) {Hidden layer (ReLU)};
         \node[annot,left of=hl] {Input layer};
         \node[annot,right of=hl] (hl2) {Hidden layer (ReLU)};
-        \node[annot,right of=hl2] {Output layer (Softmax)};
+        \node[annot,right of=hl2] {Output layer (softmax)};
     \end{tikzpicture}
     \caption{Topology of a fully-connected neural network, with 2D inputs and 3-class outputs.}
 \end{figure*}
 
-We implemented a traditional, fully-connected neural network, with
-number of hidden layers and nodes per layer specified by the user.
-We trained the neural network through stochastic gradient descent on
-our data, where the stochastic gradients are calculated by the
+We implemented a traditional, fully-connected neural network,
+with number of hidden layers and nodes per layer specified by the user.
+We trained the neural network
+through stochastic gradient descent on our data,
+where our gradients are calculated by the
 backpropogation algorithm.
 
-All hidden units were implemented as ReLU units, whose activation functions
-are defined as
-\begin{equation}f(z) = \max(0, z).\end{equation}
-The output layer was implemented as a Softmax layer for $k$ classes,
-which is intuitively similar to a multi-dimensional sigmoid. Its activation function
-is given as the vector $f(z)$ where
+All hidden units were implemented as ReLU units,
+whose activation functions are defined as
 \begin{equation}
-f(z)_i = \f{e^{z_i}}{\sum_{j=1}^{k}{e^{z_j}}} \tx{ for } i = 1,\dots,k.
+    f(z) = \max(0, z).
 \end{equation}
-We took target vectors of ``one-hot'' (1-of-k) vectors, whose loss we measured
-with cross-entropy. For a given training point $(x,y)$, the loss is
+The output layer was implemented as a softmax layer for $k$ classes,
+which is intuitively similar to a multi-dimensional sigmoid.  % TODO is this necessary?
+Its activation function is given as the vector $f(z)$ where
 \begin{equation}
-l = \sum_{i = 1}^k{y_i \log(f(z)_i)}
+    f(z)_i = \f{e^{z_i}}{\sum_{j=1}^{k}{e^{z_j}}} \tx{ for } i = 1,\dots,k.
 \end{equation}
-where $f(z)$ is defined above as the Softmax output.
-In the backpropogation algorithm, we calculated the output layer loss using the
-cross-entropy of the Softmax function,
-\begin{equation}\delta^L = f'(z^L)\circ\nabla_{a^L}l = f(z^L) - y\end{equation}
-where $\circ$ is element-wise multiplication, $f(z^L)$ is the Softmax output,
-and $y$ is the target vector. This cross-entropy loss is propogated through the 
-loss calculations for the hidden layers, which utilize the ReLU gradient instead.
+We took target vectors of ``one-hot'' (1-of-$k$) vectors,
+whose loss we measured with cross-entropy.
+For a given training point $(x,y)$, the loss is
+\begin{equation}
+    l = \sum_{i = 1}^k{y_i \log(f(z)_i)}
+\end{equation}
+where $f(z)$ is defined above as the softmax output.
+In the backpropogation algorithm,
+we calculated the output layer loss using
+the cross-entropy of the softmax function,
+\begin{equation}
+    \delta^L = f'(z^L)\circ\nabla_{a^L}l = f(z^L) - y
+\end{equation}
+where $\circ$ is element-wise multiplication, $f(z^L)$ is the softmax output,
+and $y$ is the target vector.
+This cross-entropy loss is propogated through the 
+loss calculations for the hidden layers,
+which utilize the ReLU gradient instead.
 
-For a toy problem, we tested our neural network on a 2D 3-class dataset, partitioned
-into 400 training, 200 validation, and 200 testing samples.
+For a toy problem, we tested our neural network on a 2D 3-class dataset,
+partitioned into 400 training, 200 validation, and 200 testing samples.
 A possible topology for this neural network is drawn in Figure \ref{fig:samplenn}.
-We noticed that neural network  performance was very sensitive to 
+We noticed that neural network performance was very sensitive to 
 variations in weight initialization and step size.
 For example, bad step sizes often resulted in
 the neural network's predicting only a single value for every given input.
 
 \subsection{Initialization}
 
-Since ReLU is a not fully differentiable, we set the subgradient at 0 to 0.
-As a result, we cannot simply initialize weights to 0, else gradients and activations 
-will not be updated during training. Instead, we initialize weights randomly,
-with values drawn from a Gaussian centered at 0, with standard deviation $1/\sqrt{m}$
-for a weight matrix of size $m$ by $n$.
+Since ReLU is a not fully differentiable,
+we set the subgradient at 0 to 0.
+As a result, we cannot simply initialize weights to 0,
+else gradients and activations
+will not be updated during training.
+Instead, we initialize weights randomly,
+with values drawn from a Gaussian centered at 0,
+with standard deviation $1/\sqrt{m}$
+for a weight matrix of size $m\times n$.
 
-To understand the rationale behind this method, imagine that all units are sigmoids,
-with activation function $f(z) = \f{1}{1+e^{-z}}$. Then at 0, the sigmoid is approximately
-linear, at which we lose the non-linearity benefit of multiple layers, but at larger values,
+To understand the rationale behind this method,
+imagine that all units are sigmoids,
+with activation function $f(z) = \f{1}{1+e^{-z}}$.
+Then at 0, the sigmoid is approximately linear,
+at which we lose the non-linearity benefit of multiple layers,
+but at larger values,
 our activations will saturate and increase indefinitely.
 
 Thus, we want to maintain the variance of output to inputs, such that 
@@ -155,19 +171,20 @@ since at 0, the sigmoid function
 
 \subsection{Regularization}
 
-To avoid overfitting, we can add a penalty term to our loss function, so that
+To avoid overfitting, we can add a penalty term to our loss function for regularization.
+Our loss would thus become
 \begin{equation}
-J(w) = l(w) + \lambda(||w^{(1)}||^2_F + ||w^{(2)}||^2_F)
+    J(w) = l(w) +
+      \lambda(\lVert w^{(1)} \rVert^2_F + \lVert w^{(2)} \rVert^2_F)
 \end{equation}
-where $||w|| = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
+where $\lVert w\rVert = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
 In particular, the regularization term is added to the output error $\delta^L$
 during backpropogation.
-
-This will help prevent weights from becoming too large, so the neural network will
+This helps prevent weights from becoming too large, so the neural network will
 overfit less.
 
 \subsection{Binary classification}
-\label{sec:binary}
+\label{subsec:binary}
 
 \begin{figure*}[ht]
    \centering
@@ -188,7 +205,7 @@ The first three contained 400 training samples,
 and 200 testing samples, and fourth contained 
 400 training, validation, and testing samples.
 The data consisted of two-dimensional vectors $x\sind{i}$ labeled by $y\sind{i} = \pm1$.
-To compare the target values against our Softmax outputs, we mapped $\pm1$ to
+To compare the target values against our softmax outputs, we mapped $\pm1$ to
 one-hot vectors $[1,0]$ and $[0,1]$.
 
 We trained our neural network with stochastic gradient descent, with a 
@@ -203,16 +220,16 @@ This loss was calculated once every 100 epochs.
 \label{sec:binaryarch}
 We investigated different architectures for the neural network,
 with varying number of layers and nodes per layer.
-Figure \ref{fig:1-2-arch} illustrates the effect of these architectures
-for the classic XOR dataset.
-We observed that a single 5-node hidden layer performed comparably to
-more complex structures, while the two 100-node layer network performed the
-worst, due to overfitting.
+Figure \ref{fig:1-2-arch} illustrates the effect of these architectures for the classic XOR dataset.
+We observed that a single 5-node hidden layer performed comparably to more complex structures,
+while the two 100-node layer network performed the worst, due to overfitting.
 
-We compared our neural network's performance to that of a kernelized
-Gaussian RBG SVM classifier and observed comparable performance in accuracy.
-We used optimal parameters for both, with two 5-node hidden layers
-for the neural network. Our results are shown below.
+We compared our neural network's performance to that of a
+kernelized Gaussian RBF SVM classifier and 
+observed comparable performance in accuracy.
+We used optimal parameters for both, 
+with two 5-node hidden layers for the neural network.
+Our results are shown below.
 
 \begin{center}
 \begin{tabular}{c|c|c}
@@ -233,9 +250,10 @@ with integer entries $[0,255]$ representing the grayscale luminescence of each p
 
 We normalized input pixel features to the range $[-1, 1]$,
 so that an input vector $x$ is mapped to $\f{2x}{255}-1$,
-with all operations applied componentwise. Normalization significantly
-improved prediction accuracy. Class labels were mapped to one-hot vector 
-representations. For example, an image labeled 9 would have a 
+with all operations applied componentwise.
+Normalization significantly improved prediction accuracy.
+Class labels were mapped to one-hot vector representations.
+For example, an image labeled 9 would have a 
 target vector of $[0,0,0,0,0,0,0,0,0,1]$.
 We selected 400 training, 200 validation, and 200 testing samples per class.
 
@@ -395,7 +413,7 @@ and $k=11$ is the number of classification categories.
 % What is the training accuracy for your network after training?
 % What is the validation accuracy?
 % What do these two numbers tell you about what your network is doing?
-After 1500 training steps,
+After 1500 training steps with step size $\eta = 0.01$,
 our convolutional network obtains perfect training accuracy,
 but only $67\%$ validation accuracy,
 strongly suggesting that our network is overfitting.
@@ -481,8 +499,9 @@ to get a new loss
     \ell(w) + \lambda\sum_i \lVert w\sind{i} \rVert^2
 \end{equation}
 where we include an extra term:
-the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$,
-weighted by a regularization parameter $\lambda$.
+the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$
+of the two fully-connected layers,
+weighted by a regularization parameter~$\lambda$.
 
 Again, we test each value of $\lambda$ ten times,
 and present the mean accuracies (with associated standard errors) below.
@@ -575,9 +594,110 @@ as we continue to train our model,
 suggesting that overfitting (if it is occurring at all)
 is not negatively impacting our results.
 
+In summary, none of our regularization schemes
+was particularly effective in improving validation accuracy.
 
 
-\subsection{Architecture variations}
+
+\subsection{Architectural variations}
+
+We also experimented with varying our network architecture,
+rather than just with training parameters
+(e.g. weight regularization, dropout).
+
+%    Report which changes led to
+%    the biggest increases and decreases in performance.
+%    In particular,
+%    what is the effect of making the convolutional layers have
+%    a) a larger filter size,
+
+\subsubsection{Filter sizes}
+
+We tested larger and smaller filter sizes
+on each convolutional layer.
+We first tried changing the filter sizes on both layers simultaneously,
+leaving other hyperparameters fixed.
+Our results show that filters larger than $5\times 5$
+work just as well,
+while smaller filters perform significantly worse.
+
+We also tried more novel filter size combinations.
+None yielded any statistically significant improvement
+over our original $5\times 5$ filters.
+
+We present our findings
+in Figure~\ref{fig:filter-size-experiment}.
+
+\begin{figure*}[t]
+   \centering
+   \includegraphics[width=4in]{img/2-5-filter-size-acc.pdf} 
+   \caption{Mean validation accuracies for various filter size choices (each tested $n=10$ times).
+       Error bars denote standard error of the mean.}
+   \label{fig:filter-size-experiment}
+\end{figure*}
+
+%\begin{center}
+%    \begin{tabular}{c|cc}
+%        Filter sizes & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
+%        $3\times 3$ & $95.00 \pm 1.67$ & $60.69 \pm 0.98$ \\
+%        $5\times 5$ & $100.00 \pm 0.00$ & $65.98 \pm 1.03$ \\
+%        $7\times 7$ & $100.00 \pm 0.00$ & $64.02 \pm 1.07$ \\
+%        $3^2$ then $9^2$ & $100.00 \pm 0.00$ & $66.44 \pm 1.12$ \\
+%        $5^2$ then $3^2$ & $98.00 \pm 2.00$ & $64.60 \pm 0.61$ \\
+%        $9^2$ then $3^2$ & $100.00 \pm 0.00$ & $65.06 \pm 0.88$ \\        
+%        $9^2$ then $5^2$ & $100.00 \pm 0.00$ & $65.52 \pm 0.62$
+%    \end{tabular}
+%\end{center}
+
+
+\subsubsection{Stride}
+
+%    b) a larger stride and
+We tried varying the strides on our convolutional layers as well.
+No setting we tried yielded statistically significant improvement
+over our baseline $5\times 5$ filters with stride $2$.
+
+
+%    c) greater depth?
+\subsubsection{Depth}
+
+Finally, we considered the number of feature maps
+we used at each layer.
+
+
+
+%    How does a pyramidal-shaped network
+%    in which the feature maps gradually decrease in height and width
+%    but increase in depth
+%    compare to a flat architecture,
+%    or one with the opposite shape?
+
+
+
+
+%    Finished training. Total time taken: 185.3328869342804
+%    Training accuracies: [ 0.9  0.9  0.9  0.9  0.9  0.8  0.8  0.9  1.   1. ]
+%    Validation accuracies: [ 0.65517241  0.64367816  0.67816092  0.64367816  0.71264368  0.66666667
+%      0.64367816  0.71264368  0.68965517  0.65517241]
+%    Mean training accuracy: 90.00% +- 2.11%
+%    Mean validation accuracy: 67.01% +- 0.86%
+%    You ran command: conv.py --pooling --depths 12 24 --repeat 10
+
+%    Finished training. Total time taken: 222.4871289730072
+%    Training accuracies: [ 1.   0.9  0.9  0.9  1.   1.   0.8  1.   0.8  1. ]
+%    Validation accuracies: [ 0.67816092  0.70114943  0.66666667  0.65517241  0.67816092  0.64367816
+%      0.63218391  0.71264368  0.70114943  0.66666667]
+%    Mean training accuracy: 93.00% +- 2.60%
+%    Mean validation accuracy: 67.36% +- 0.83%
+%    You ran command: conv.py --pooling --depths 24 12 --repeat 10
+
+%    Finished training. Total time taken: 203.84384393692017
+%    Training accuracies: [ 0.9  1.   1.   0.9  0.9  1.   0.9  1.   1.   1. ]
+%    Validation accuracies: [ 0.67816092  0.64367816  0.68965517  0.67816092  0.66666667  0.67816092
+%      0.64367816  0.67816092  0.59770115  0.67816092]
+%    Mean training accuracy: 96.00% +- 1.63%
+%    Mean validation accuracy: 66.32% +- 0.87%
+%    You ran command: conv.py --pooling --depths 10 30 --repeat 10
 
 
 
@@ -585,3 +705,69 @@ is not negatively impacting our results.
 \end{multicols}
 
 \end{document}
+
+
+
+%    Finished training. Total time taken: 174.98675990104675
+%    Training accuracies: [ 1.   1.   1.   1.   1.   0.8  1.   1.   0.9  1. ]
+%    Validation accuracies: [ 0.75862069  0.73563218  0.65517241  0.68965517  0.68965517  0.68965517
+%      0.66666667  0.64367816  0.6091954   0.66666667]
+%    Mean training accuracy: 97.00% +- 2.13%
+%    Mean validation accuracy: 68.05% +- 1.37%
+%    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
+
+%    Finished training. Total time taken: 244.02631878852844
+%    Training accuracies: [ 0.9  1.   0.9  1.   0.9  1.   1.   1.   1.   1. ]
+%    Validation accuracies: [ 0.67816092  0.62068966  0.63218391  0.72413793  0.68965517  0.68965517
+%      0.64367816  0.67816092  0.62068966  0.72413793]
+%    Mean training accuracy: 97.00% +- 1.53%
+%    Mean validation accuracy: 67.01% +- 1.24%
+
+%    67.5287356 \pm 0.905346418252
+%    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
+
+%    Finished training. Total time taken: 130.73607516288757
+%    Training accuracies: [ 0.9  1.   1.   1.   0.9  1.   0.9  1.   1.   0.9]
+%    Validation accuracies: [ 0.67816092  0.64367816  0.63218391  0.64367816  0.62068966  0.62068966
+%      0.66666667  0.65517241  0.6091954   0.66666667]
+%    Mean training accuracy: 96.00% +- 1.63%
+%    Mean validation accuracy: 64.37% +- 0.73%
+%    You ran command: conv.py --filter_sizes 7 5 --pooling --repeat 10
+
+%    Finished training. Total time taken: 191.86493802070618
+%    Training accuracies: [ 1.   0.9  1.   0.9  0.7  0.6  1.   1.   0.8  1. ]
+%    Validation accuracies: [ 0.6091954   0.71264368  0.6091954   0.68965517  0.64367816  0.64367816
+%      0.68965517  0.66666667  0.65517241  0.64367816]
+%    Mean training accuracy: 89.00% +- 4.58%
+%    Mean validation accuracy: 65.63% +- 1.08%
+%    You ran command: conv.py --filter_sizes 9 3 --pooling --repeat 10
+
+
+
+
+%    Finished training. Total time taken: 89.55591106414795
+%    Training accuracies: [ 0.9  0.8  0.9  0.8  0.9  0.9  0.8  0.8  0.7  0.9]
+%    Validation accuracies: [ 0.66666667  0.64367816  0.68965517  0.67816092  0.63218391  0.6091954
+%      0.6091954   0.63218391  0.5862069   0.5862069 ]
+%    Mean training accuracy: 84.00% +- 2.21%
+%    Mean validation accuracy: 63.33% +- 1.16%
+%    You ran command: conv.py --strides 4 4 --repeat 10
+
+%    Finished training. Total time taken: 1270.8897230625153
+%    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+%    Validation accuracies: [ 0.63218391  0.59770115  0.5862069   0.62068966  0.64367816  0.64367816
+%      0.59770115  0.64367816  0.52873563  0.51724138]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 60.11% +- 1.46%
+%    You ran command: conv.py --strides 1 1 --repeat 10
+
+%    Validation accuracy: 64.37%
+%    Finished training. Total time taken: 134.22611594200134
+%    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+%    Validation accuracies: [ 0.62068966  0.65517241  0.64367816  0.62068966  0.62068966  0.64367816
+%      0.67816092  0.70114943  0.59770115  0.64367816]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 64.25% +- 0.96%
+%    You ran command: conv.py --strides 3 1 --repeat 10
+
+

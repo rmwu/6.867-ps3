@@ -23,6 +23,9 @@ class ArtistConvNet:
                  num_training_steps,
                  dropout_frac,
                  weight_penalty,
+                 filter_sizes,
+                 depths,
+                 strides,
                  pooling_params,
                  training_data_file,
                  plot_progress):
@@ -35,6 +38,9 @@ class ArtistConvNet:
         self.num_training_steps = num_training_steps
         self.dropout_frac = dropout_frac
         self.weight_penalty = weight_penalty
+        self.filter_sizes = filter_sizes
+        self.depths = depths
+        self.strides = strides
         self.pooling_params = pooling_params
         self.plot_progress = plot_progress
         if invariance:
@@ -48,12 +54,12 @@ class ArtistConvNet:
         # Hyperparameters
         batch_size = 10
         learning_rate = 0.01
-        layer1_filter_size = 5
-        layer1_depth = 16
-        layer1_stride = 2
-        layer2_filter_size = 5
-        layer2_depth = 16
-        layer2_stride = 2
+        layer1_filter_size = self.filter_sizes[0]
+        layer1_depth = self.depths[0]
+        layer1_stride = self.strides[0]
+        layer2_filter_size = self.filter_sizes[1]
+        layer2_depth = self.depths[1]
+        layer2_stride = self.strides[1]
         layer3_num_hidden = 64
         layer4_num_hidden = 64
         num_training_steps = self.num_training_steps
@@ -109,22 +115,14 @@ class ArtistConvNet:
                 '''Define the actual network architecture'''
 
                 # Layer 1
-                conv1 = tf.nn.conv2d(data, layer1_weights, [1, layer1_stride, layer1_stride, 1], padding='SAME')
-                hidden = tf.nn.relu(conv1 + layer1_biases)
-
+                hidden = add_conv_layer(data, layer1_weights, layer1_biases, layer1_stride)
                 if pooling:
-                    hidden = tf.nn.max_pool(hidden, ksize=[1, layer1_pool_filter_size, layer1_pool_filter_size, 1],
-                                            strides=[1, layer1_pool_stride, layer1_pool_stride, 1],
-                                            padding='SAME', name='pool1')
+                    hidden = add_pool_layer(hidden, layer1_pool_filter_size, layer1_pool_stride, 1)
                 
                 # Layer 2
-                conv2 = tf.nn.conv2d(hidden, layer2_weights, [1, layer2_stride, layer2_stride, 1], padding='SAME')
-                hidden = tf.nn.relu(conv2 + layer2_biases)
-
+                hidden = add_conv_layer(hidden, layer2_weights, layer2_biases, layer2_stride)
                 if pooling:
-                    hidden = tf.nn.max_pool(hidden, ksize=[1, layer2_pool_filter_size, layer2_pool_filter_size, 1],
-                                            strides=[1, layer2_pool_stride, layer2_pool_stride, 1],
-                                            padding='SAME', name='pool2')
+                    hidden = add_pool_layer(hidden, layer2_pool_filter_size, layer2_pool_stride, 2)
                 
                 # Layer 3
                 shape = hidden.get_shape().as_list()
@@ -246,6 +244,26 @@ class ArtistConvNet:
             self.low_contrast_val_X = save['low_contrast_val_data']
             del save
 
+def add_conv_layer(input_data, weights, biases, stride):
+    """
+    Construct a convolved version of input_data with given
+    filter weights, biases, and stride.
+    """
+    conv = tf.nn.conv2d(input_data, weights, [1, stride, stride, 1], padding='SAME')
+    return tf.nn.relu(conv + biases)
+
+def add_pool_layer(input_data, filter_size, stride, layer_num):
+    """
+    Construct a pooled version of input_data with given
+    pooling filter size and stride.
+    layer_num helps set optional name of the operation.
+    """
+    return tf.nn.max_pool(input_data,
+                          ksize=[1, filter_size, filter_size, 1],
+                          strides=[1, stride, stride, 1],
+                          padding='SAME',
+                          name='pool{}'.format(layer_num))
+
 def weight_decay_penalty(weights, penalty):
     return penalty * sum([tf.nn.l2_loss(w) for w in weights])
 
@@ -255,17 +273,15 @@ def accuracy(predictions, labels):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
+        description="Train/test a convolutional network on art data.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
     parser.add_argument("--invariance", action="store_true",
                         help="Test finished model on invariance datasets.")
     parser.add_argument("--dropout", type=float, default=1.0,
                         help="Dropout fraction.")
-    parser.add_argument("--pooling", action="store_true",
-                        help="Turn on pooling.")
-    parser.add_argument("--pool_stride", type=int, default=2,
-                        help="Pooling stride. Does not turn on pooling.")
-    parser.add_argument("--pool_filter_size", type=int, default=2,
-                        help="Pooling filter size. Does not turn on pooling.")
+    parser.add_argument("--training_steps", type=int, default=1501,
+                        help="Number of steps to train our conv net.")
     parser.add_argument("--repeat", type=int, default=1,
                         help="Number of times to train with these parameters.")
     parser.add_argument("--weight_penalty", type=float, default=0.0,
@@ -273,12 +289,23 @@ if __name__ == '__main__':
                              "coefficient on Frobenius weight matrix norms in loss.")
     parser.add_argument("--augmented", action="store_true",
                         help="Use the augmented dataset.")
-    parser.add_argument("--training_steps", type=int, default=1501,
-                        help="Number of steps to train our conv net.")
     parser.add_argument("--plot_progress",
                         help="Location to save plot of validation error over training. "
                              "Do not include the file extension. "
                              "Don't use with repeat > 1.")
+
+    parser.add_argument("--pooling", action="store_true",
+                        help="Turn on pooling.")
+    parser.add_argument("--pool_stride", type=int, default=2,
+                        help="Pooling stride. Does not turn on pooling.")
+    parser.add_argument("--pool_filter_size", type=int, default=2,
+                        help="Pooling filter size. Does not turn on pooling.")
+    parser.add_argument("--filter_sizes", type=int, nargs=2, default=[5, 5],
+                        help="Size of the convolutional layer filters.")
+    parser.add_argument("--depths", type=int, nargs=2, default=[16, 16],
+                        help="Number of feature maps at each convolutional layer.")
+    parser.add_argument("--strides", type=int, nargs=2, default=[2, 2],
+                        help="Strides of convolutional layers.")
 
     args = parser.parse_args()
 
@@ -300,6 +327,9 @@ if __name__ == '__main__':
                                  num_training_steps=args.training_steps,
                                  dropout_frac=args.dropout,
                                  weight_penalty=args.weight_penalty,
+                                 filter_sizes=args.filter_sizes,
+                                 depths=args.depths,
+                                 strides=args.strides,
                                  pooling_params={"pooling": args.pooling,
                                                  "filter_size": args.pool_filter_size,
                                                  "stride": args.pool_stride},
