@@ -112,7 +112,7 @@ and $k=11$ is the number of classification categories.
 % What is the training accuracy for your network after training?
 % What is the validation accuracy?
 % What do these two numbers tell you about what your network is doing?
-After 1500 training steps,
+After 1500 training steps with step size $\eta = 0.01$,
 our convolutional network obtains perfect training accuracy,
 but only $67\%$ validation accuracy,
 strongly suggesting that our network is overfitting.
@@ -198,8 +198,9 @@ to get a new loss
     \ell(w) + \lambda\sum_i \lVert w\sind{i} \rVert^2
 \end{equation}
 where we include an extra term:
-the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$,
-weighted by a regularization parameter $\lambda$.
+the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$
+of the two fully-connected layers,
+weighted by a regularization parameter~$\lambda$.
 
 Again, we test each value of $\lambda$ ten times,
 and present the mean accuracies (with associated standard errors) below.
@@ -292,12 +293,36 @@ as we continue to train our model,
 suggesting that overfitting (if it is occurring at all)
 is not negatively impacting our results.
 
+In summary, none of our regularization schemes
+was particularly effective in improving validation accuracy.
 
 
-\subsection{Architecture variations}
 
+\subsection{Architectural variations}
 
+%    Finished training. Total time taken: 174.98675990104675
+%    Training accuracies: [ 1.   1.   1.   1.   1.   0.8  1.   1.   0.9  1. ]
+%    Validation accuracies: [ 0.75862069  0.73563218  0.65517241  0.68965517  0.68965517  0.68965517
+%      0.66666667  0.64367816  0.6091954   0.66666667]
+%    Mean training accuracy: 97.00% +- 2.13%
+%    Mean validation accuracy: 68.05% +- 1.37%
+%    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
 
+%    Finished training. Total time taken: 130.73607516288757
+%    Training accuracies: [ 0.9  1.   1.   1.   0.9  1.   0.9  1.   1.   0.9]
+%    Validation accuracies: [ 0.67816092  0.64367816  0.63218391  0.64367816  0.62068966  0.62068966
+%      0.66666667  0.65517241  0.6091954   0.66666667]
+%    Mean training accuracy: 96.00% +- 1.63%
+%    Mean validation accuracy: 64.37% +- 0.73%
+%    You ran command: conv.py --filter_sizes 7 5 --pooling --repeat 10
+
+%    Finished training. Total time taken: 210.48802614212036
+%    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+%    Validation accuracies: [ 0.65517241  0.66666667  0.71264368  0.62068966  0.67816092  0.65517241
+%      0.66666667  0.64367816  0.65517241  0.65517241]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 66.09% +- 0.75%
+%    You ran command: conv.py --filter_sizes 9 5 --repeat 10
 
 \end{multicols}
 
