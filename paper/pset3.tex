@@ -45,12 +45,14 @@ backpropogation algorithm.
 
 All hidden units were implemented as ReLU units, whose activation functions
 are defined as
-\begin{equation}f(z) = \max(0, z).\end{equation}
+\begin{equation}
+    f(z) = \max(0, z).
+\end{equation}
 The output layer was implemented as a Softmax layer for $k$ classes,
 which is intuitively similar to a multi-dimensional sigmoid. Its activation function
 is given as the vector $f(z)$ where
 \begin{equation}
-f(z)_i = \f{e^{z_i}}{\sum_{j=1}^{k}{e^{z_j}}} \tx{ for } i = 1,\dots,k.
+    f(z)_i = \f{e^{z_i}}{\sum_{j=1}^{k}{e^{z_j}}} \tx{ for } i = 1,\dots,k.
 \end{equation}
 We took target vectors of ``one-hot'' (1-of-k) vectors, whose loss we measured
 with cross-entropy. For a given training point $(x,y)$, the loss is
@@ -80,9 +82,11 @@ be reasonable since... % TODO
 
 To avoid overfitting, we can add a penalty term to our loss function for regularization.
 Our loss would thus become
-\begin{equation}J(w) = l(w) + \lambda(||w^{(1)}||^2_F + ||w^{(2)}||^2_F)
+\begin{equation}
+    J(w) = l(w) +
+      \lambda(\lVert w^{(1)} \rVert^2_F + \lVert w^{(2)} \rVert^2_F)
 \end{equation}
-where $||w|| = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
+where $\lVert w\rVert = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
 
 \subsection{Binary classification}
 
@@ -398,12 +402,128 @@ was particularly effective in improving validation accuracy.
 
 \subsection{Architectural variations}
 
+We also experimented with varying our network architecture,
+rather than just with training parameters
+(e.g. weight regularization, dropout).
+
+%    Report which changes led to
+%    the biggest increases and decreases in performance.
+%    In particular,
+%    what is the effect of making the convolutional layers have
+%    a) a larger filter size,
+
+\subsubsection{Filter sizes}
+
+We tested larger and smaller filter sizes
+on each convolutional layer.
+We first tried changing the filter sizes on both layers simultaneously,
+leaving other hyperparameters fixed.
+Our results show that filters larger than $5\times 5$
+work just as well,
+while smaller filters perform significantly worse.
+
+We also tried more novel filter size combinations.
+None yielded any statistically significant improvement
+over our original $5\times 5$ filters.
+
+We present our findings
+in Figure~\ref{fig:filter-size-experiment}.
+
+\begin{figure*}[t]
+   \centering
+   \includegraphics[width=4in]{img/2-5-filter-size-acc.pdf} 
+   \caption{Mean validation accuracies for various filter size choices (each tested $n=10$ times). Error bars denote standard error of the mean.}
+   \label{fig:filter-size-experiment}
+\end{figure*}
+
+%\begin{center}
+%    \begin{tabular}{c|cc}
+%        Filter sizes & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
+%        $3\times 3$ & $95.00 \pm 1.67$ & $60.69 \pm 0.98$ \\
+%        $5\times 5$ & $100.00 \pm 0.00$ & $65.98 \pm 1.03$ \\
+%        $7\times 7$ & $100.00 \pm 0.00$ & $64.02 \pm 1.07$ \\
+%        $3^2$ then $9^2$ & $100.00 \pm 0.00$ & $66.44 \pm 1.12$ \\
+%        $5^2$ then $3^2$ & $98.00 \pm 2.00$ & $64.60 \pm 0.61$ \\
+%        $9^2$ then $3^2$ & $100.00 \pm 0.00$ & $65.06 \pm 0.88$ \\        
+%        $9^2$ then $5^2$ & $100.00 \pm 0.00$ & $65.52 \pm 0.62$
+%    \end{tabular}
+%\end{center}
+
+
+\subsubsection{Stride}
+
+%    b) a larger stride and
+We tried varying the strides on our convolutional layers as well.
+No setting we tried yielded statistically significant improvement
+over our baseline $5\times 5$ filters with stride $2$.
+
+
+%    c) greater depth?
+\subsubsection{Depth}
+
+Finally, we considered the number of feature maps
+we used at each layer.
+
+
+
+%    How does a pyramidal-shaped network
+%    in which the feature maps gradually decrease in height and width
+%    but increase in depth
+%    compare to a flat architecture,
+%    or one with the opposite shape?
+
+
+
+
+%    Finished training. Total time taken: 185.3328869342804
+%    Training accuracies: [ 0.9  0.9  0.9  0.9  0.9  0.8  0.8  0.9  1.   1. ]
+%    Validation accuracies: [ 0.65517241  0.64367816  0.67816092  0.64367816  0.71264368  0.66666667
+%      0.64367816  0.71264368  0.68965517  0.65517241]
+%    Mean training accuracy: 90.00% +- 2.11%
+%    Mean validation accuracy: 67.01% +- 0.86%
+%    You ran command: conv.py --pooling --depths 12 24 --repeat 10
+
+%    Finished training. Total time taken: 222.4871289730072
+%    Training accuracies: [ 1.   0.9  0.9  0.9  1.   1.   0.8  1.   0.8  1. ]
+%    Validation accuracies: [ 0.67816092  0.70114943  0.66666667  0.65517241  0.67816092  0.64367816
+%      0.63218391  0.71264368  0.70114943  0.66666667]
+%    Mean training accuracy: 93.00% +- 2.60%
+%    Mean validation accuracy: 67.36% +- 0.83%
+%    You ran command: conv.py --pooling --depths 24 12 --repeat 10
+
+%    Finished training. Total time taken: 203.84384393692017
+%    Training accuracies: [ 0.9  1.   1.   0.9  0.9  1.   0.9  1.   1.   1. ]
+%    Validation accuracies: [ 0.67816092  0.64367816  0.68965517  0.67816092  0.66666667  0.67816092
+%      0.64367816  0.67816092  0.59770115  0.67816092]
+%    Mean training accuracy: 96.00% +- 1.63%
+%    Mean validation accuracy: 66.32% +- 0.87%
+%    You ran command: conv.py --pooling --depths 10 30 --repeat 10
+
+
+
+
+\end{multicols}
+
+\end{document}
+
+
+
 %    Finished training. Total time taken: 174.98675990104675
 %    Training accuracies: [ 1.   1.   1.   1.   1.   0.8  1.   1.   0.9  1. ]
 %    Validation accuracies: [ 0.75862069  0.73563218  0.65517241  0.68965517  0.68965517  0.68965517
 %      0.66666667  0.64367816  0.6091954   0.66666667]
 %    Mean training accuracy: 97.00% +- 2.13%
 %    Mean validation accuracy: 68.05% +- 1.37%
+%    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
+
+%    Finished training. Total time taken: 244.02631878852844
+%    Training accuracies: [ 0.9  1.   0.9  1.   0.9  1.   1.   1.   1.   1. ]
+%    Validation accuracies: [ 0.67816092  0.62068966  0.63218391  0.72413793  0.68965517  0.68965517
+%      0.64367816  0.67816092  0.62068966  0.72413793]
+%    Mean training accuracy: 97.00% +- 1.53%
+%    Mean validation accuracy: 67.01% +- 1.24%
+
+%    67.5287356 \pm 0.905346418252
 %    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
 
 %    Finished training. Total time taken: 130.73607516288757
@@ -414,14 +534,40 @@ was particularly effective in improving validation accuracy.
 %    Mean validation accuracy: 64.37% +- 0.73%
 %    You ran command: conv.py --filter_sizes 7 5 --pooling --repeat 10
 
-%    Finished training. Total time taken: 210.48802614212036
+%    Finished training. Total time taken: 191.86493802070618
+%    Training accuracies: [ 1.   0.9  1.   0.9  0.7  0.6  1.   1.   0.8  1. ]
+%    Validation accuracies: [ 0.6091954   0.71264368  0.6091954   0.68965517  0.64367816  0.64367816
+%      0.68965517  0.66666667  0.65517241  0.64367816]
+%    Mean training accuracy: 89.00% +- 4.58%
+%    Mean validation accuracy: 65.63% +- 1.08%
+%    You ran command: conv.py --filter_sizes 9 3 --pooling --repeat 10
+
+
+
+
+%    Finished training. Total time taken: 89.55591106414795
+%    Training accuracies: [ 0.9  0.8  0.9  0.8  0.9  0.9  0.8  0.8  0.7  0.9]
+%    Validation accuracies: [ 0.66666667  0.64367816  0.68965517  0.67816092  0.63218391  0.6091954
+%      0.6091954   0.63218391  0.5862069   0.5862069 ]
+%    Mean training accuracy: 84.00% +- 2.21%
+%    Mean validation accuracy: 63.33% +- 1.16%
+%    You ran command: conv.py --strides 4 4 --repeat 10
+
+%    Finished training. Total time taken: 1270.8897230625153
 %    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
-%    Validation accuracies: [ 0.65517241  0.66666667  0.71264368  0.62068966  0.67816092  0.65517241
-%      0.66666667  0.64367816  0.65517241  0.65517241]
+%    Validation accuracies: [ 0.63218391  0.59770115  0.5862069   0.62068966  0.64367816  0.64367816
+%      0.59770115  0.64367816  0.52873563  0.51724138]
 %    Mean training accuracy: 100.00% +- 0.00%
-%    Mean validation accuracy: 66.09% +- 0.75%
-%    You ran command: conv.py --filter_sizes 9 5 --repeat 10
+%    Mean validation accuracy: 60.11% +- 1.46%
+%    You ran command: conv.py --strides 1 1 --repeat 10
 
-\end{multicols}
+%    Validation accuracy: 64.37%
+%    Finished training. Total time taken: 134.22611594200134
+%    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+%    Validation accuracies: [ 0.62068966  0.65517241  0.64367816  0.62068966  0.62068966  0.64367816
+%      0.67816092  0.70114943  0.59770115  0.64367816]
+%    Mean training accuracy: 100.00% +- 0.00%
+%    Mean validation accuracy: 64.25% +- 0.96%
+%    You ran command: conv.py --strides 3 1 --repeat 10
 
-\end{document}
+
