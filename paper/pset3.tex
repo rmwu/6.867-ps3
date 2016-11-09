@@ -138,24 +138,50 @@ converged to predicting only a single value for every given input.
 \subsection{Initialization}
 
 Since ReLU is a not fully differentiable, we set the subgradient at 0 to 0.
-As a result, we cannot simply initialize weights to 0, else all gradients and activations 
+As a result, we cannot simply initialize weights to 0, else gradients and activations 
 will not be updated during training. Instead, we initialize weights randomly,
 with values drawn from a Gaussian centered at 0, with standard deviation $1/\sqrt{m}$
 for a weight matrix of size $m$ by $n$.
 
-If all units were sigmoids, rather than ReLUs, then this initialization method would 
-be reasonable since... % TODO
+To understand the rationale behind this method, imagine that all units are sigmoids,
+with activation function $f(z) = \f{1}{1+e^{-z}}$. Then at 0, the sigmoid is approximately
+linear, at which we lose the non-linearity benefit of multiple layers, but at larger values,
+our activations will saturate and increase indefinitely.
+
+Thus, we want to maintain the variance of output to inputs, such that 
+
+then this initialization method is reasonable
+since at 0, the sigmoid function  
 
 \subsection{Regularization}
 
-To avoid overfitting, we can add a penalty term to our loss function for regularization.
-Our loss would thus become
-\begin{equation}J(w) = l(w) + \lambda(||w^{(1)}||^2_F + ||w^{(2)}||^2_F)
+To avoid overfitting, we can add a penalty term to our loss function, so that
+\begin{equation}
+J(w) = l(w) + \lambda(||w^{(1)}||^2_F + ||w^{(2)}||^2_F)
 \end{equation}
 where $||w|| = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
+In particular, the regularization term is added to the output error $\delta^L$
+during backpropogation.
+
+This will help prevent weights from becoming too large, so the neural network will
+overfit less.
 
 \subsection{Binary classification}
 \label{sec:binary}
+
+\begin{figure*}
+   \centering
+   \includegraphics[width=2.5in]{img/p1/4-1small-382of400-16500.pdf}
+   \includegraphics[width=2.5in]{img/p1/4-2small-380of400-3550.pdf}
+   \includegraphics[width=2.5in]{img/p1/4-1large-380of400.pdf}
+   \includegraphics[width=2.5in]{img/p1/4-2large-379of400-123000.pdf}
+   \caption{Variations on neural network architectures for classification of
+   XOR data. We see that increasing number of layers increases non-linearity,
+   while increasing number of nodes per layer increases overfitting. 
+   }
+   \label{fig:1-2-arch}
+\end{figure*}
+
 We tested our implementation against 2D artificial datasets.
 The first three contained 400 training samples,
 200 validation samples,
@@ -167,7 +193,7 @@ one-hot vectors $[1,0]$ and $[0,1]$.
 
 We trained our neural network with stochastic gradient descent, with a 
 fixed stepsize, $\eta = 0.01$. Stochastic gradient descent terminated when
-the cross-entropy loss on our validation set dropped below a constant threshold.
+the change in cross-entropy loss on our validation set dropped below a constant threshold of 0.001.
 This loss was calculated once every 100 epochs.
 
 % TODO actually get reliable results from this
