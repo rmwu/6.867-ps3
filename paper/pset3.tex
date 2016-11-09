@@ -169,7 +169,7 @@ overfit less.
 \subsection{Binary classification}
 \label{sec:binary}
 
-\begin{figure*}
+\begin{figure*}[ht]
    \centering
    \includegraphics[width=2.5in]{img/p1/4-1small-382of400-16500.pdf}
    \includegraphics[width=2.5in]{img/p1/4-2small-380of400-3550.pdf}
@@ -201,16 +201,28 @@ This loss was calculated once every 100 epochs.
 
 \subsubsection{Architecture variations}
 \label{sec:binaryarch}
-We investigated different architectures for the neural network, including
-\begin{enumerate}
-\item 1 small hidden layer (5 nodes)
-\item 1 large hidden layer (100 nodes)
-\item 2 small hidden layers (5 nodes each)
-\item 2 large hidden layers (100 nodes each)
-\end{enumerate}
+We investigated different architectures for the neural network,
+with varying number of layers and nodes per layer.
+Figure \ref{fig:1-2-arch} illustrates the effect of these architectures
+for the classic XOR dataset.
+We observed that a single 5-node hidden layer performed comparably to
+more complex structures, while the two 100-node layer network performed the
+worst, due to overfitting.
 
 We compared our neural network's performance to that of a kernelized
-Gaussian RBG SVM classifier and observed similar performance in accuracy.
+Gaussian RBG SVM classifier and observed comparable performance in accuracy.
+We used optimal parameters for both, with two 5-node hidden layers
+for the neural network. Our results are shown below.
+
+\begin{center}
+\begin{tabular}{c|c|c}
+dataset & SVM accuracy	& NN accuracy \\\hline
+        1	& 1.0 & 1.0\\
+        2	& 0.94 & 0.92 \\
+        3	& 0.965 & 0.96 \\
+        4	& 0.9575 & 0.945
+\end{tabular}
+\end{center}
 
 \subsection{MNIST multi-class classification}
 
@@ -234,15 +246,48 @@ dropped below a constant threshold, 0.001 (checked every 200 epochs).
 
 \subsubsection{Architecture variations}
 
-We classified our data with the same architectures enumerated in Section \ref{sec:binaryarch}.
+We classified our data with different architectures, varying number of layers
+and nodes per layer. This is analogous to Section \ref{sec:binaryarch}.
+
+% TODO plug my computer in so I can actually run these
+
+\begin{center}
+\begin{tabular}{c|c|c|c}
+hidden layers & accuracy	& epochs & $\eta$ \\\hline
+        20		& ??? 	& ??? 		& 0.01\\
+        20,20	& 0.9215 	& 200 000 (redo) 	& 0.01\\
+        100		& 0.9445 	& 152 500 	& 0.01 \\
+        100,100	& 0.9505 	& 104 500 	& 0.01
+\end{tabular}
+\end{center}
+
+%[20, 20]
+%Ran for 200001 iterations.
+%Guessed 1843 correct out of 2000 (0.9215)
+%Average loss 0.537023668884212
+
+%[100]
+%Ran for 152500 iterations.
+%Guessed 1889 correct out of 2000 (0.9445)
+%Average loss 0.43865500872982616
+
+%[100, 100]
+%Ran for 104500 iterations.
+%Guessed 1901 correct out of 2000 (0.9505)
+%Average loss 0.3172982679689496
 
 % % % % % % % % % %
 %    PROBLEM 2
 % % % % % % % % % %
 
+In addition to $k$-class classification of individual digits, we also
+used our neural network for binary classification of digit pairs,
+to compare with other classification methods.
+
 \section{Convolutional Neural Networks}
 
 % TODO connect from previous section
+% you can connect straight from MNIST cuz images
 
 Empirically, deeper convolution networks work better.
 To see why, we introduce the notion of \emph{receptive field}
