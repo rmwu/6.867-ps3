@@ -113,6 +113,8 @@ def onehot(y, n):
     n      number of dimensions
     """
     vector = np.zeros(n)
+    if n == 2:
+        y = int((y + 2) / 2)
     vector[y] = 1
     return vector
 
