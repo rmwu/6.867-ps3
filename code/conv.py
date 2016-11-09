@@ -25,6 +25,7 @@ class ArtistConvNet:
                  weight_penalty,
                  filter_sizes,
                  depths,
+                 strides,
                  pooling_params,
                  training_data_file,
                  plot_progress):
@@ -39,6 +40,7 @@ class ArtistConvNet:
         self.weight_penalty = weight_penalty
         self.filter_sizes = filter_sizes
         self.depths = depths
+        self.strides = strides
         self.pooling_params = pooling_params
         self.plot_progress = plot_progress
         if invariance:
@@ -54,10 +56,10 @@ class ArtistConvNet:
         learning_rate = 0.01
         layer1_filter_size = self.filter_sizes[0]
         layer1_depth = self.depths[0]
-        layer1_stride = 2
+        layer1_stride = self.strides[0]
         layer2_filter_size = self.filter_sizes[1]
         layer2_depth = self.depths[1]
-        layer2_stride = 2
+        layer2_stride = self.strides[1]
         layer3_num_hidden = 64
         layer4_num_hidden = 64
         num_training_steps = self.num_training_steps
@@ -302,6 +304,8 @@ if __name__ == '__main__':
                         help="Size of the convolutional layer filters.")
     parser.add_argument("--depths", type=int, nargs=2, default=[16, 16],
                         help="Number of feature maps at each convolutional layer.")
+    parser.add_argument("--strides", type=int, nargs=2, default=[2, 2],
+                        help="Strides of convolutional layers.")
 
     args = parser.parse_args()
 
@@ -325,6 +329,7 @@ if __name__ == '__main__':
                                  weight_penalty=args.weight_penalty,
                                  filter_sizes=args.filter_sizes,
                                  depths=args.depths,
+                                 strides=args.strides,
                                  pooling_params={"pooling": args.pooling,
                                                  "filter_size": args.pool_filter_size,
                                                  "stride": args.pool_stride},
