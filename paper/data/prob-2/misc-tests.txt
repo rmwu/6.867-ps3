@@ -1,0 +1,7 @@
+Finished training. Total time taken: 268.51822996139526
+Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+Validation accuracies: [ 0.64367816  0.65517241  0.67816092  0.67816092  0.63218391  0.66666667
+  0.66666667  0.66666667  0.65517241  0.68965517]
+Mean training accuracy: 100.00% +- 0.00%
+Mean validation accuracy: 66.32% +- 0.54%
+You ran command: conv.py --pooling --depths 45 45 --weight_penalty 0.003 --repeat 10

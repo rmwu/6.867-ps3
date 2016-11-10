@@ -63,6 +63,14 @@ Mean training accuracy: 100.00% +- 0.00%
 Mean validation accuracy: 70.46% +- 0.91%
 You ran command: conv.py --pooling --depths 45 45 --repeat 10
 
+Finished training. Total time taken: 194.4977149963379
+Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+Validation accuracies: [ 0.70114943  0.75862069  0.65517241  0.67816092  0.64367816  0.70114943
+  0.71264368  0.68965517  0.71264368  0.71264368]
+Mean training accuracy: 100.00% +- 0.00%
+Mean validation accuracy: 69.66% +- 1.03%
+You ran command: conv.py --pooling --depths 45 45 --repeat 10
+
 Finished training. Total time taken: 244.49944615364075
 Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
 Validation accuracies: [ 0.71264368  0.73563218  0.67816092  0.68965517  0.67816092  0.67816092
