@@ -1,0 +1,43 @@
+Accuracy on normal validation data: 67.82%
+Accuracy on translated data: 40.23%
+Accuracy on brightened data: 32.18%
+Accuracy on darkened data: 57.47%
+Accuracy on high contrast data: 32.18%
+Accuracy on low contrast data: 57.47%
+Accuracy on flipped data: 49.43%
+Accuracy on inverted data: 10.34%
+Finished training. Total time taken: 17.396790027618408
+You ran command: conv.py --pooling --depths 45 45 --invariance
+
+Accuracy on normal validation data: 71.26%
+Accuracy on translated data: 37.93%
+Accuracy on brightened data: 35.63%
+Accuracy on darkened data: 59.77%
+Accuracy on high contrast data: 35.63%
+Accuracy on low contrast data: 59.77%
+Accuracy on flipped data: 44.83%
+Accuracy on inverted data: 9.20%
+Finished training. Total time taken: 25.05497717857361
+You ran command: conv.py --pooling --depths 45 45 --invariance
+
+Accuracy on normal validation data: 66.67%
+Accuracy on translated data: 39.08%
+Accuracy on brightened data: 43.68%
+Accuracy on darkened data: 54.02%
+Accuracy on high contrast data: 43.68%
+Accuracy on low contrast data: 54.02%
+Accuracy on flipped data: 51.72%
+Accuracy on inverted data: 8.05%
+Finished training. Total time taken: 25.798091888427734
+You ran command: conv.py --pooling --depths 45 45 --invariance
+
+Accuracy on normal validation data: 66.67%
+Accuracy on translated data: 40.23%
+Accuracy on brightened data: 37.93%
+Accuracy on darkened data: 51.72%
+Accuracy on high contrast data: 37.93%
+Accuracy on low contrast data: 51.72%
+Accuracy on flipped data: 51.72%
+Accuracy on inverted data: 9.20%
+Finished training. Total time taken: 17.771546125411987
+You ran command: conv.py --pooling --depths 45 45 --invariance

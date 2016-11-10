@@ -15,3 +15,11 @@ Mean validation accuracy: 64.25% +- 1.26%
 You ran command: conv.py --depths 45 45 --repeat 10
 
 ^^^ note: no pooling used.
+
+Finished training. Total time taken: 342.83587193489075
+Training accuracies: [ 0.9  0.9  0.9  0.9  0.8  1.   0.8  0.9  1.   1. ]
+Validation accuracies: [ 0.62068966  0.67816092  0.64367816  0.67816092  0.64367816  0.66666667
+  0.68965517  0.64367816  0.65517241  0.67816092]
+Mean training accuracy: 91.00% +- 2.33%
+Mean validation accuracy: 65.98% +- 0.69%
+You ran command: conv.py --depths 45 45 --dropout 0.9 --repeat 10
