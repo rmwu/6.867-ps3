@@ -591,7 +591,7 @@ As before, we repeat training ten times
 and report means and standard errors.
 \begin{center}
     \begin{tabular}{cc|cc}
-        Augmented & Steps & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
+        Aug. & Steps & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
         No  & 1500 & $100.00 \pm 0.00$ & $65.98 \pm 1.03$ \\
 %        No  & 6000 & $100.00 \pm 0.00$ & $66.21 \pm 0.86$ \\
         Yes & 6000 & $100.00 \pm 0.00$ & $62.30 \pm 0.61$
@@ -603,26 +603,6 @@ Indeed, using the augmented data with 6000 steps
 produced statistically significantly worse results
 than using the original training set with 1500 steps
 (Student's $t$-test, $p=0.0066$).
-
-
-%    Finished training. Total time taken: 741.599348783493
-%    Validation accuracies: [0.6091954,0.63218391,0.63218391,0.6091954,0.64367816,0.59770115,0.65517241,0.63218391,0.62068966,0.59770115]
-%    Mean training accuracy: 100.00% +- 0.00%
-%    Mean validation accuracy: 62.30% +- 0.61%
-%    You ran command: conv.py --repeat 10 --augmented --training_steps 6001
-
-%    Finished training. Total time taken: 591.5699789524078
-%    Validation accuracies: [ 0.68965517,0.68965517,0.66666667,0.65517241,0.68965517,0.6091954,0.64367816,0.66666667,0.67816092,0.63218391]
-%    Mean training accuracy: 100.00% +- 0.00%
-%    Mean validation accuracy: 66.21% +- 0.86%
-%    You ran command: conv.py --repeat 10 --training_steps 6001
-
-%    Finished training. Total time taken: 151.98044800758362
-%    Validation accuracies: [0.67816092,0.62068966,0.65517241,0.71264368,0.71264368,0.65517241,0.65517241,0.64367816,0.62068966,0.64367816]
-%    Mean training accuracy: 100.00% +- 0.00%
-%    Mean validation accuracy: 65.98% +- 1.03%
-%    You ran command: conv.py --repeat 10 --training_steps 1501
-
 
 \subsubsection{Early stopping}
 
@@ -677,16 +657,16 @@ We also tried more novel filter size combinations.
 None yielded any statistically significant improvement
 over our original $5\times 5$ filters.
 
-We present some of our findings
-in Figure~\ref{fig:filter-size-experiment}.
-
-\begin{figure*}[t]
-   \centering
-   \includegraphics[width=4in]{img/2-5-filter-size-acc.pdf} 
-   \caption{Mean validation accuracies for various filter size choices (each tested $n=10$ times).
-       Error bars denote standard error of the mean.}
-   \label{fig:filter-size-experiment}
-\end{figure*}
+%We present some of our findings
+%in Figure~\ref{fig:filter-size-experiment}.
+%
+%\begin{figure*}[t]
+%   \centering
+%   \includegraphics[width=4in]{img/2-5-filter-size-acc.pdf} 
+%   \caption{Mean validation accuracies for various filter size choices (each tested $n=10$ times).
+%       Error bars denote standard error of the mean.}
+%   \label{fig:filter-size-experiment}
+%\end{figure*}
 
 %\begin{center}
 %    \begin{tabular}{c|cc}
@@ -726,9 +706,9 @@ we find that increasing the depth has a significant positive effect
 on validation accuracies,
 as is evident from Figure~\ref{fig:2-5-conv-depth-val-acc}.
 For instance, at depth 45,
-we achieved a mean validation accuracy of $70.46\% \pm 0.91\%$,
+we achieved a mean validation accuracy of $70.46 \pm 0.91\%$,
 which was statistically significantly greater
-than our baseline at depth 15 of $64.83\% \pm 1.11\%$
+than our baseline at depth~15 of $64.83 \pm 1.11\%$
 (Student's $t$-test, $p=0.001$).
 
 \begin{figure*}[t]
@@ -741,9 +721,7 @@ than our baseline at depth 15 of $64.83\% \pm 1.11\%$
 
 The training accuracy was close to perfect
 for each of these tests,
-suggesting overfitting.
-Still, 
-
+suggesting some degree of overfitting.
 
 
 %    How does a pyramidal-shaped network
@@ -752,7 +730,16 @@ Still,
 %    compare to a flat architecture,
 %    or one with the opposite shape?
 
-
+We also varied depths independently.
+In particular,
+we tested ``pyramidal" architectures
+in which we gave the second layer a larger depth
+compared with the first.
+Of course, we also tried the inverse architecture,
+with smaller depths on the second layer.
+No such architecture performed better
+than the best architecture we found when
+we varied the depths in lockstep (depths 45 and 45).
 
 
 
