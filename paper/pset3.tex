@@ -43,59 +43,10 @@
 
 \def\layersep{2.5cm}
 
-% tikz taken and adjusted from
-% http://www.texample.net/tikz/examples/neural-network/
 \begin{figure*}[t]
     \label{fig:samplenn}
     \centering
-    \begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=\layersep]
-        \tikzstyle{every pin edge}=[<-,shorten <=1pt]
-        \tikzstyle{neuron}=[circle,fill=black!25,minimum size=16pt,inner sep=0pt]
-        \tikzstyle{input neuron}=[neuron, fill=CornflowerBlue!50];
-        \tikzstyle{output neuron}=[neuron, fill=Dandelion!50];
-        \tikzstyle{hidden neuron}=[neuron, fill=YellowGreen!50];
-        \tikzstyle{annot} = [text width=5em, text centered]
-    
-        % Draw the input layer nodes
-        \foreach \name / \y in {1,...,2}
-        % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
-            \node[input neuron, pin=left:Input \#\y] (I-\name) at (0,-1cm-\y cm) {};
-    
-        % Draw the hidden layer nodes
-        \foreach \name / \y in {1,...,5}
-            \path[yshift=0.5cm]
-                node[hidden neuron] (H-\name) at (\layersep,-\y cm) {};
-                
-        \foreach \name / \y in {6,...,10}
-            \path[yshift=0.5cm]
-                node[hidden neuron] (H-\name) at (2*\layersep,-\y cm + 5cm) {};
-    
-        % Draw the output layer node
-        \foreach \name / \y in {1,...,3}
-            \node[output neuron,pin={[pin edge={->}]right:Output \#\y}, right of=H-8] (O-\name) at (2*\layersep, -\y cm-0.5cm){};
-    
-        % Connect every node in the input layer with every node in the
-        % hidden layer.
-        \foreach \source in {1,...,2}
-            \foreach \dest in {1,...,5}
-                \path (I-\source) edge (H-\dest);
-        
-        % Connect every node in hidden layer 1 to hidden layer 2
-        \foreach \source in {1,...,5}
-            \foreach \dest in {6,...,10}
-                \path (H-\source) edge (H-\dest);
-    
-        % Connect every node in the hidden layer with the output layer
-        \foreach \source in {6,...,10}
-            \foreach \dest in {1,...,3}
-                \path (H-\source) edge (O-\dest);
-    
-        % Annotate the layers
-        \node[annot,above of=H-1, node distance=1cm] (hl) {Hidden layer (ReLU)};
-        \node[annot,left of=hl] {Input layer};
-        \node[annot,right of=hl] (hl2) {Hidden layer (ReLU)};
-        \node[annot,right of=hl2] {Output layer (softmax)};
-    \end{tikzpicture}
+    \input{tex/nn-diagram-tikz.tex}
     \caption{Topology of a fully-connected neural network, with 2D inputs and 3-class outputs.}
 \end{figure*}
 
@@ -306,9 +257,7 @@ with integer entries in $[0,255]$
 representing the grayscale luminance of each pixel.
 
 We normalized input pixel features to the range $[-1, 1]$,
-so that an input vector $x$ is mapped to $\f{2x}{255}-1$,
-with all operations applied componentwise.
-Normalization significantly improved prediction accuracy.
+which significantly improved prediction accuracy.
 Class labels were mapped to one-hot vector representations.
 We selected 400 training, 200 validation, and 200 testing samples per class.
 
@@ -322,16 +271,6 @@ We tested different architectures on MNIST,
 varying number of layers and nodes per layer,
 in analogy to section~\ref{subsubsec:binaryarch}.
 
-% 20,20
-%Ran for 302500 iterations.
-%Guessed 1851 correct out of 2000 (0.9255)
-%Average loss 0.5390193224725606
-
-% 20
-%Ran for 216000 iterations.
-%Guessed 1876 correct out of 2000 (0.938)
-%Average loss 0.6027523211225306
-
 \begin{center}
     \begin{tabular}{c|c|c|c}
         hidden layers & accuracy	& epochs & $\eta$ \\\hline
@@ -341,41 +280,6 @@ in analogy to section~\ref{subsubsec:binaryarch}.
         100,100	& 0.9505 	& 104 500 	& 0.01
     \end{tabular}
 \end{center}
-
-% 4,9 [100]
-%Ran for 16500 iterations.
-%Guessed 381 correct out of 400 (0.9525)
-%Average loss 0.12142020187035087
-
-% 4,9 [100,100]
-%Ran for 18000 iterations.
-%Guessed 381 correct out of 400 (0.9525)
-%Average loss 0.20364621990226375
-
-% 3,5 [100]
-%Ran for 10000 iterations.
-%Guessed 388 correct out of 400 (0.97)
-%Average loss 0.09079234230339693
-
-% 3,5 [100, 100]
-%Ran for 13000 iterations.
-%Guessed 389 correct out of 400 (0.9725)
-%Average loss 0.11671382468804836
-
-% 1,7 [20, 20]
-%Ran for 6500 iterations.
-%Guessed 394 correct out of 400 (0.985)
-%Average loss 0.044168742106228315
-
-% 1,7 [100]
-%Ran for 2000 iterations.
-%Guessed 397 correct out of 400 (0.9925)
-%Average loss 0.03602293463505232
-
-% 1,7 [100, 100]
-%Ran for 5500 iterations.
-%Guessed 398 correct out of 400 (0.995)
-%Average loss 0.029611779980850093
 
 In addition to $k$-class classification of individual digits,
 we also used our neural network for binary classification of digit pairs,
@@ -393,7 +297,7 @@ Our results are below
         4, 9 & 95.3 & 96.0 & 94.3 & 94.6 \\
     \end{tabular}
 \end{center}
-Neural network performance with comparable with that of the other models.
+Neural network performance was comparable with that of the other models.
 
 
 % % % % % % % % % %
@@ -432,9 +336,9 @@ so intuitively,
 deeper convolutional networks should better detect large-scale structure.
 
 % How many layers are there?
-We tested an existing four-layer convolutional network implementation
-on an image classification problem,
-where given RGB images of 451 paintings by 11 artists
+We tested a four-layer convolutional network implementation
+on an image classification problem:
+given RGB images of 451 paintings by 11 artists
 (all downsampled to $50\times 50$),
 we would like to predict the artist that painted the given image.
 
@@ -488,7 +392,7 @@ strongly suggesting that our network is overfitting.
 % and choose different values for the pooling filter size and stride.
 % After you applied max pooling, what happened to your results?
 % How did the training accuracy vs. validation accuracy change?
-We tried added max-pooling
+We tried adding max-pooling
 after both convolutional layers.
 We experimented with various pooling filter sizes and strides.
 In all cases,
@@ -518,12 +422,12 @@ we leave the remaining hyperparameters (e.g. training steps, pooling) unchanged.
 
 
 We implemented dropout for the fully connected layer (the third layer).
-We tested various values of dropout parameter~$p$,
-the probability we do \emph{not} drop out a neuron.
+We tested various values of the probability~$p$
+that we do \emph{not} drop out a neuron.
 For each $p$, we trained $n=10$ separate models;
-we present the mean training and validation accuracies
-with their respective standard errors here.
-Training accuracies are quoted on the final minibatch of ten samples.
+we present mean training and validation accuracies
+with standard errors here.
+Training accuracies are quoted on the final training minibatch.
 \begin{center}
     \begin{tabular}{c|cc}
         $p$ & Train $\pm 1 \sigma$ (\%) & Validation $\pm 1 \sigma$\\\hline
@@ -558,10 +462,10 @@ to get a new loss
 \end{equation}
 where we include an extra term:
 the sum of the squared Frobenius norms of the weight matrices $w\sind{i}$
-of the two fully-connected layers,
+of the fully-connected layers,
 weighted by a regularization parameter~$\lambda$.
 
-Again, we test each value of $\lambda$ ten times,
+We tested each value of $\lambda$ ten times,
 and present the mean accuracies (with associated standard errors) below.
 
 \begin{center}
@@ -575,22 +479,22 @@ and present the mean accuracies (with associated standard errors) below.
       % 1.0  &  $50.00 \pm 0.00$ & $37.70 \pm 0.33$ \\
     \end{tabular}
 \end{center}
-Small values of $\lambda$ produced
+Small $\lambda$ produced
 statistically insignificant improvement in validation accuracies;
-larger values saw significantly worse performance
-in both training and validation accuracies.
+larger values saw significantly worse
+training and validation accuracies.
 Thus, weight regularization
 is unlikely to be particularly helpful.
 
 
 \subsubsection{Data augmentation}
 
-We next enlarged our training dataset
+We next quadrupled our training dataset
 with transformed versions of the original training samples
 and trained on this augmented dataset.
-This new dataset was four times as large as the original,
-so we quadrupled the number of training steps
-when working with the augmented training data.
+We quadrupled the number of training steps
+when working with the augmented training data
+to maintain the same amount of training per example.
 
 We present our results as below.
 As before, we repeat training ten times
@@ -603,30 +507,28 @@ and report means and standard errors.
         Yes & 6000 & $100.00 \pm 0.00$ & $62.30 \pm 0.61$
     \end{tabular}
 \end{center}
-
-Note that data augmentation actually lowered our validation accuracy.
-Indeed, using the augmented data with 6000 steps
+Note that using the augmented data with 6000 steps
 produced statistically significantly worse results
-than using the original training set with 1500 steps
 (Student's $t$-test, $p=0.0066$).
 
 \subsubsection{Early stopping}
 
-Finally, we consider early stopping as a means of regularization.
-We monitored the validation error
-of our model each time we trained it;
-we show a representative plot in Figure~\ref{fig:2-4-4-validation-acc}.
+Finally, we considered early stopping as a means of regularization.
+To explore how validation accuracy improves during training,
+we plotted it (Figure~\ref{fig:2-4-4-validation-acc}).
 
 \begin{figure*}[t]
    \centering
-   \includegraphics[width=3.5in]{img/2-4-4-validation-acc-new.pdf}
-   \caption{Validation error of our convolutional network during training.}
+   \includegraphics[width=4.5in]{img/2-4-4-validation-acc-new.pdf}
+   \caption{Validation error of one realization of our convolutional network
+   (with all hyperparameters unchanged from their original values)
+   during training.}
    \label{fig:2-4-4-validation-acc}
 \end{figure*}
 
-After around 1000 training steps,
+Notice that after 1000 training steps,
 validation accuracy fails to improve further.
-We note, however, that validation accuracy
+However, validation accuracy
 does not significantly \emph{decrease}
 as we continue to train our model,
 suggesting that overfitting (if it is occurring at all)
@@ -639,8 +541,8 @@ was particularly effective in improving validation accuracy.
 
 \subsection{Architectural variations}
 
-We also experimented with varying our network architecture,
-rather than just with training parameters
+We also tried varying our network architecture,
+rather than just tweaking training parameters
 (e.g. weight regularization, dropout).
 
 %    Report which changes led to
@@ -655,13 +557,10 @@ We tested larger and smaller filter sizes
 on each convolutional layer.
 We first tried changing the filter sizes on both layers simultaneously,
 leaving other hyperparameters fixed.
-Our results show that filters larger than $5\times 5$
-work just as well,
-while smaller filters perform significantly worse.
-
-We also tried more novel filter size combinations.
-None yielded any statistically significant improvement
-over our original $5\times 5$ filters.
+Filters larger than $5\times 5$ performed just as well,
+while smaller filters performed significantly worse.
+More novel filter size combinations
+did not yield any improvement either.
 
 %We present some of our findings
 %in Figure~\ref{fig:filter-size-experiment}.
@@ -688,43 +587,39 @@ over our original $5\times 5$ filters.
 %\end{center}
 
 %    b) a larger stride and
-We tried varying the strides on our convolution100
-al layers as well.
-No setting we tried yielded statistically significant improvement
+We tried varying the strides on our convolutional layers as well.
+No setting we tried produced statistically significant improvement
 over our baseline $5\times 5$ filters with stride $2$.
 
 
 %    c) greater depth?
 \subsubsection{Depth}
 
-Finally, we considered the number of feature maps
+Finally, we varied the number of feature maps
 we used at each layer.
 For this section,
-we including $2\times 2$ max-pooling layers with stride 2
+we included $2\times 2$ max-pooling layers with stride 2
 after each convolutional layer.
 (We found that pooling significantly improved results.)
 
 Holding the depths of the two convolutional layers equal,
-we find that increasing the depth
-significantly improved validation accuracies,
-as is evident from Figure~\ref{fig:2-5-conv-depth-val-acc}.
-For instance, at depth 45,
-we achieved a mean validation accuracy of $70.46 \pm 0.91\%$,
+increasing the depth significantly improved validation accuracies
+(Figure~\ref{fig:2-5-conv-depth-val-acc}).
+At depth 45, we achieved a mean validation accuracy of $70.5 \pm 0.9\%$,
 which was statistically significantly greater
-than our baseline at depth~15 of $64.83 \pm 1.11\%$
+than our baseline (depth~15) of $64.8 \pm 1.1\%$
 (Student's $t$-test, $p=0.001$).
 
 \begin{figure*}[t]
    \centering
-   \includegraphics[width=3.5in]{img/2-5-conv-depth-val-acc.pdf}
+   \includegraphics[width=4.5in]{img/2-5-conv-depth-val-acc.pdf}
    \caption{Mean validation accuracies (with standard errors of the means)
        of convolutional networks with equal depth at both convolutional layers.}
    \label{fig:2-5-conv-depth-val-acc}
 \end{figure*}
 
-The training accuracy was close to perfect
-for each of these tests,
-suggesting some degree of overfitting.
+Near-perfect training accuracies in each of these tests
+suggested some degree of overfitting.
 
 
 %    How does a pyramidal-shaped network
@@ -734,11 +629,10 @@ suggesting some degree of overfitting.
 %    or one with the opposite shape?
 
 We also varied depths independently.
-In particular,
-we tested ``pyramidal" architectures
+We tested ``pyramidal" architectures
 in which the second layer had a larger depth
-compared with the first.
-We also tried the reverse architecture.
+compared with the first;
+we also tried the reverse architecture.
 No such architecture performed better
 than the best architecture we found when
 we varied the depths in lockstep (depths 45 and 45).
@@ -746,17 +640,12 @@ we varied the depths in lockstep (depths 45 and 45).
 
 \subsection{Invariance}
 
-We experimented further,
-attempting to improve upon the optimal architecture
-from the previous section
-(depths 45 and 45, with pooling layers)
-by adding weight regularization and dropout.
-We failed to do so, however,
-so we evaluated the depth-45 architecture
-by testing it on variations of the validation data.\footnote{These
-    variations were:
-    normal, translated, brightened, darkened,
-    high contrast, low contrast, flipped (reflected), colors inverted.}
+Further experimentation with training parameters
+failed to improve upon
+the optimal architecture from the previous section
+(depths 45 and 45, with pooling layers),
+which we took as our best model.
+We tested it on transformed versions of the validation data.
 
 We present the results of one test here:
 \begin{center}
@@ -769,7 +658,7 @@ We present the results of one test here:
         high contrast & 35.63 \\
         low contrast &59.77\\
         flipped & 44.83\\
-        inverted & 9.20%
+        inverted & 9.20
     \end{tabular}
 \end{center}
 Our model was relatively insensitive
@@ -782,8 +671,6 @@ On the other hand,
 our network was very sensitive to color inversion,
 suggesting that it learned features
 related to different artists' choice of color.
-
-
 
 \end{multicols}
 

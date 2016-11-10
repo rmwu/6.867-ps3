@@ -1,0 +1,45 @@
+ 20,20
+Ran for 302500 iterations.
+Guessed 1851 correct out of 2000 (0.9255)
+Average loss 0.5390193224725606
+
+ 20
+Ran for 216000 iterations.
+Guessed 1876 correct out of 2000 (0.938)
+Average loss 0.6027523211225306
+
+
+ 4,9 [100]
+Ran for 16500 iterations.
+Guessed 381 correct out of 400 (0.9525)
+Average loss 0.12142020187035087
+
+ 4,9 [100,100]
+Ran for 18000 iterations.
+Guessed 381 correct out of 400 (0.9525)
+Average loss 0.20364621990226375
+
+ 3,5 [100]
+Ran for 10000 iterations.
+Guessed 388 correct out of 400 (0.97)
+Average loss 0.09079234230339693
+
+ 3,5 [100, 100]
+Ran for 13000 iterations.
+Guessed 389 correct out of 400 (0.9725)
+Average loss 0.11671382468804836
+
+ 1,7 [20, 20]
+Ran for 6500 iterations.
+Guessed 394 correct out of 400 (0.985)
+Average loss 0.044168742106228315
+
+ 1,7 [100]
+Ran for 2000 iterations.
+Guessed 397 correct out of 400 (0.9925)
+Average loss 0.03602293463505232
+
+ 1,7 [100, 100]
+Ran for 5500 iterations.
+Guessed 398 correct out of 400 (0.995)
+Average loss 0.029611779980850093
