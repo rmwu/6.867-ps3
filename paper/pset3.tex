@@ -149,6 +149,32 @@ variations in weight initialization and step size.
 For example, bad step sizes often resulted in
 the neural network's predicting only a single value for every given input.
 
+\begin{figure*}
+   \centering
+   \includegraphics[width=3in]{img/p1/1-200of200.pdf}\hspace{-.25in}
+   \includegraphics[width=3in]{img/p1/2-183of200.pdf}
+   \includegraphics[width=3in]{img/p1/3-192of200.pdf}\hspace{-.25in}
+   \includegraphics[width=3in]{img/p1/4-382of400.pdf}
+   \caption{Neural network classification of four 2D datasets.
+   Datasets 1-4 had training/testing accuracies 1.0/1.0, 0.9375/0.915, 0.9825/0.965, and 0.96/0.955,
+   respectively.
+   }
+   \label{fig:1-2-classify}
+\end{figure*}
+
+\begin{figure*}
+   \centering
+   \includegraphics[width=3in]{img/p1/4-1small-382of400-16500.pdf}\hspace{-.25in}
+   \includegraphics[width=3in]{img/p1/4-2small-380of400-3550.pdf}
+   \includegraphics[width=3in]{img/p1/4-1large-380of400.pdf}\hspace{-.25in}
+   \includegraphics[width=3in]{img/p1/4-2large-379of400-123000.pdf}
+   \caption{Variations on neural network architectures for classification of
+   XOR data. We see that increasing number of layers increases non-linearity,
+   while increasing number of nodes per layer increases overfitting. 
+   }
+   \label{fig:1-2-arch}
+\end{figure*}
+
 \subsection{Network training}
 
 We stochastically updated our weights,
@@ -210,32 +236,6 @@ through to subsequent error calculations for each hidden layer
 (even though we don't compute the error again).
 Regularization helps prevent weights from becoming too large,
 so the neural network will overfit less.
-
-\begin{figure*}[h]
-   \centering
-   \includegraphics[width=2.5in]{img/p1/1-200of200.pdf}
-   \includegraphics[width=2.5in]{img/p1/2-183of200.pdf}
-   \includegraphics[width=2.5in]{img/p1/3-192of200.pdf}
-   \includegraphics[width=2.5in]{img/p1/4-382of400.pdf}
-   \caption{Neural network classification of four 2D datasets.
-   Datasets 1-4 had training/testing accuracies 1.0/1.0, 0.9375/0.915, 0.9825/0.965, and 0.96/0.955,
-   respectively.
-   }
-   \label{fig:1-2-classify}
-\end{figure*}
-
-\begin{figure*}[h]
-   \centering
-   \includegraphics[width=2.5in]{img/p1/4-1small-382of400-16500.pdf}
-   \includegraphics[width=2.5in]{img/p1/4-2small-380of400-3550.pdf}
-   \includegraphics[width=2.5in]{img/p1/4-1large-380of400.pdf}
-   \includegraphics[width=2.5in]{img/p1/4-2large-379of400-123000.pdf}
-   \caption{Variations on neural network architectures for classification of
-   XOR data. We see that increasing number of layers increases non-linearity,
-   while increasing number of nodes per layer increases overfitting. 
-   }
-   \label{fig:1-2-arch}
-\end{figure*}
 
 \subsection{Binary classification}
 \label{subsubsec:binary}
