@@ -103,20 +103,25 @@ We implemented a traditional, fully-connected neural network,
 with number of hidden layers and nodes per layer specified by the user.
 We trained the neural network
 through stochastic gradient descent on our data,
-where our gradients are calculated by the
-backpropogation algorithm.
+where gradients were calculated by the
+backpropagation algorithm.
 
 All hidden units were implemented as ReLU units,
 whose activation functions are defined as
 \begin{equation}
     f(z) = \max(0, z).
 \end{equation}
-The output layer was implemented as a softmax layer for $k$ classes,
-which is intuitively similar to a multi-dimensional sigmoid.  % TODO is this necessary?
+% Describe how the choice of a softmax output layer and 
+% cross-entropy loss is incorporated into your implementation.
+The output layer was implemented as a softmax layer for $k$ classes.
 Its activation function is given as the vector $f(z)$ where
 \begin{equation}
     f(z)_i = \f{e^{z_i}}{\sum_{j=1}^{k}{e^{z_j}}} \tx{ for } i = 1,\dots,k.
 \end{equation}
+The softmax function separates classes
+by assigning higher values to more likely classes,
+so for a given sample $x$, we estimate its class $y$ as the most likely one
+given by softmax.
 We took target vectors of ``one-hot'' (1-of-$k$) vectors,
 whose loss we measured with cross-entropy.
 For a given training point $(x,y)$, the loss is
@@ -124,7 +129,7 @@ For a given training point $(x,y)$, the loss is
     l = \sum_{i = 1}^k{y_i \log(f(z)_i)}
 \end{equation}
 where $f(z)$ is defined above as the softmax output.
-In the backpropogation algorithm,
+In the backpropagation algorithm,
 we calculated the output layer loss using
 the cross-entropy of the softmax function,
 \begin{equation}
@@ -132,19 +137,34 @@ the cross-entropy of the softmax function,
 \end{equation}
 where $\circ$ is element-wise multiplication, $f(z^L)$ is the softmax output,
 and $y$ is the target vector.
-This cross-entropy loss is propogated through the 
+This cross-entropy loss is back propagated through the 
 loss calculations for the hidden layers,
 which utilize the ReLU gradient instead.
 
 For a toy problem, we tested our neural network on a 2D 3-class dataset,
 partitioned into 400 training, 200 validation, and 200 testing samples.
-A possible topology for this neural network is drawn in Figure \ref{fig:samplenn}.
+A possible topology for this neural network is drawn in Figure~\ref{fig:samplenn}.
 We noticed that neural network performance was very sensitive to 
 variations in weight initialization and step size.
 For example, bad step sizes often resulted in
 the neural network's predicting only a single value for every given input.
 
-\subsection{Initialization}
+\subsection{Network training}
+
+We stochastically updated our weights,
+by randomly selecting a sample $(x^{(i)}, y^{(i)})$ per epoch
+and updating accordingly.
+Our update function is as follows,
+\begin{align}
+W_{t+1} &= W_t - \eta \f{\partial l}{\partial W_t^l}
+= W_t - \eta a^{l-1} (\delta^l)^T \\
+b_{t+1} &= b_t - \eta \f{\partial l}{\partial b_t^l}
+= b_t - \eta \delta^l
+\end{align}
+where $l$ is cross-entropy loss, $\eta$ is the learning rate,
+and $\delta$ is the calculated backpropagation error.
+
+\subsubsection{Initialization}
 
 Since ReLU is a not fully differentiable,
 we set the subgradient at 0 to 0.
@@ -159,17 +179,23 @@ for a weight matrix of size $m\times n$.
 To understand the rationale behind this method,
 imagine that all units are sigmoids,
 with activation function $f(z) = \f{1}{1+e^{-z}}$.
-Then at 0, the sigmoid is approximately linear,
-at which we lose the non-linearity benefit of multiple layers,
-but at larger values,
-our activations will saturate and increase indefinitely.
+If weights are too small, then the activations will decrease every layer.
+This is an issue since the sigmoid function is approximately linear around 0,
+at which we lose the non-linearity of our hidden layers.
+However, if our weights are too large,
+then the activations will increase indefinitely,
+at which point the sigmoid levels off,
+and gradients artificially approach 0.
+Thus, we want to maintain a constant variance in gradients between
+inputs and outputs, such that
+\begin{equation}
+\f{\sigma^2(z)}{\sigma^2(x)} = \f{\sigma^2(W^TX)}{\sigma^2(X)}
+= \f{n\sigma^2(W)\sigma^2{X}}{\sigma^2(X)} = n\sigma^2(W) = 1
+\end{equation}
+For backpropagation, we use the same logic to derive that
+$\sigma^2(W) = 1/m$, so $\sigma(W) = 1/\sqrt{m}$.
 
-Thus, we want to maintain the variance of output to inputs, such that 
-
-then this initialization method is reasonable
-since at 0, the sigmoid function  
-
-\subsection{Regularization}
+\subsubsection{Regularization}
 
 To avoid overfitting, we can add a penalty term to our loss function for regularization.
 Our loss would thus become
@@ -179,14 +205,26 @@ Our loss would thus become
 \end{equation}
 where $\lVert w\rVert = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
 In particular, the regularization term is added to the output error $\delta^L$
-during backpropogation.
-This helps prevent weights from becoming too large, so the neural network will
-overfit less.
+during backpropagation. The change in $\delta^L$ is then propagated
+through to subsequent error calculations for each hidden layer
+(even though we don't compute the error again).
+Regularization helps prevent weights from becoming too large,
+so the neural network will overfit less.
 
-\subsection{Binary classification}
-\label{subsec:binary}
+\begin{figure*}[h]
+   \centering
+   \includegraphics[width=2.5in]{img/p1/1-200of200.pdf}
+   \includegraphics[width=2.5in]{img/p1/2-183of200.pdf}
+   \includegraphics[width=2.5in]{img/p1/3-192of200.pdf}
+   \includegraphics[width=2.5in]{img/p1/4-382of400.pdf}
+   \caption{Neural network classification of four 2D datasets.
+   Datasets 1-4 had training/testing accuracies 1.0/1.0, 0.9375/0.915, 0.9825/0.965, and 0.96/0.955,
+   respectively.
+   }
+   \label{fig:1-2-classify}
+\end{figure*}
 
-\begin{figure*}[ht]
+\begin{figure*}[h]
    \centering
    \includegraphics[width=2.5in]{img/p1/4-1small-382of400-16500.pdf}
    \includegraphics[width=2.5in]{img/p1/4-2small-380of400-3550.pdf}
@@ -199,45 +237,48 @@ overfit less.
    \label{fig:1-2-arch}
 \end{figure*}
 
+\subsection{Binary classification}
+\label{subsubsec:binary}
+
 We tested our implementation against 2D artificial datasets.
 The first three contained 400 training samples,
 200 validation samples,
 and 200 testing samples, and fourth contained 
 400 training, validation, and testing samples.
-The data consisted of two-dimensional vectors $x\sind{i}$ labeled by $y\sind{i} = \pm1$.
-To compare the target values against our softmax outputs, we mapped $\pm1$ to
-one-hot vectors $[1,0]$ and $[0,1]$.
+The data consisted of two-dimensional vectors $x\sind{i}$
+labeled by $y\sind{i} = \pm1$.
+To compare the target values against our softmax outputs,
+we mapped $\pm1$ to one-hot vectors $[1,0]$ and $[0,1]$.
+Our results are illustrated in Figure~\ref{fig:1-2-classify},
+with training and testing accuracies denoted.
 
 We trained our neural network with stochastic gradient descent, with a 
 fixed stepsize, $\eta = 0.01$. Stochastic gradient descent terminated when
 the change in cross-entropy loss on our validation set dropped below a constant threshold of 0.001.
 This loss was calculated once every 100 epochs.
 
-% TODO actually get reliable results from this
-% TODO nice images
-
 \subsubsection{Architecture variations}
-\label{sec:binaryarch}
+\label{subsubsubsec:binaryarch}
 We investigated different architectures for the neural network,
 with varying number of layers and nodes per layer.
-Figure \ref{fig:1-2-arch} illustrates the effect of these architectures for the classic XOR dataset.
+Figure~\ref{fig:1-2-arch} illustrates the effect of these architectures for the classic XOR dataset.
 We observed that a single 5-node hidden layer performed comparably to more complex structures,
 while the two 100-node layer network performed the worst, due to overfitting.
 
-We compared our neural network's performance to that of a
-kernelized Gaussian RBF SVM classifier and 
-observed comparable performance in accuracy.
-We used optimal parameters for both, 
-with two 5-node hidden layers for the neural network.
-Our results are shown below.
+We compared our neural network's performance to that of 
+logistic regression and a kernelized Gaussian RBF SVM classifier.
+Our neural network achieved comparable performance in accuracy,
+using optimal parameters for all classifiers,
+and two 5-node hidden layers for the neural network.
+Our classification accuracies are shown below.
 
 \begin{center}
-\begin{tabular}{c|c|c}
-dataset & SVM accuracy	& NN accuracy \\\hline
-        1	& 1.0 & 1.0\\
-        2	& 0.94 & 0.92 \\
-        3	& 0.965 & 0.96 \\
-        4	& 0.9575 & 0.945
+\begin{tabular}{c|c|c|c}
+dataset 	& LR  	& SVM & NN  \\\hline
+        1	&1.0		& 1.0 & 1.0\\
+        2	&0.81	& 0.94 & 0.92 \\
+        3	&0.975 	& 0.965 & 0.96 \\
+        4	&0.50	& 0.9575 & 0.945
 \end{tabular}
 \end{center}
 
@@ -257,28 +298,34 @@ For example, an image labeled 9 would have a
 target vector of $[0,0,0,0,0,0,0,0,0,1]$.
 We selected 400 training, 200 validation, and 200 testing samples per class.
 
-As in Section \ref{sec:binary}, we determined the termination criteria as
-when the change in objective function (cross-entropy loss on Softmax output)
-dropped below a constant threshold, 0.001 (checked every 200 epochs).
+As in Section \ref{subsubsec:binary}, we determined the termination criteron as
+when the change in objective function (cross-entropy loss on softmax output)
+dropped below a constant threshold, 0.001 (checked every 500 epochs).
 
 \subsubsection{Architecture variations}
 
 We classified our data with different architectures, varying number of layers
-and nodes per layer. This is analogous to Section \ref{sec:binaryarch}.
+and nodes per layer. This is analogous to Section \ref{subsubsubsec:binaryarch}.
 
-% TODO plug my computer in so I can actually run these
+% 20,20
+%Ran for 302500 iterations.
+%Guessed 1851 correct out of 2000 (0.9255)
+%Average loss 0.5390193224725606
+
+% 20
+%Ran for 216000 iterations.
+%Guessed 1876 correct out of 2000 (0.938)
+%Average loss 0.6027523211225306
 
 \begin{center}
 \begin{tabular}{c|c|c|c}
 hidden layers & accuracy	& epochs & $\eta$ \\\hline
-        20		& ??? 	& ??? 		& 0.01\\
-        20,20	& 0.9215 	& 200 000 (redo) 	& 0.01\\
+        20		& 0.9350 	& 216 000 	& 0.01\\
+        20,20	& 0.9255 	& 302 500 	& 0.01\\
         100		& 0.9445 	& 152 500 	& 0.01 \\
         100,100	& 0.9505 	& 104 500 	& 0.01
 \end{tabular}
 \end{center}
-
-
 
 % 4,9 [100]
 %Ran for 16500 iterations.

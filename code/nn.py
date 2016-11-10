@@ -114,6 +114,7 @@ def train_nn(X, y, network_size, max_iterations,
         # gg don't forget to increment this...
         time += 1
 
+    test_nn(X, y, weights, bias, activation_func, output_func, loss_func, loud = True)
     print("Ran for {} iterations.".format(time))
     return (weights, bias)
 
