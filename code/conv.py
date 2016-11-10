@@ -193,7 +193,7 @@ class ArtistConvNet:
                     
                     # This code is for the final question
                     if self.invariance:
-                        print("\n Obtaining final results on invariance sets!")
+                        print("\nObtaining final results on invariance sets!")
                         sets = [self.val_X, self.translated_val_X, self.bright_val_X, self.dark_val_X,
                                 self.high_contrast_val_X, self.low_contrast_val_X, self.flipped_val_X,
                                 self.inverted_val_X,]
