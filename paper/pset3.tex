@@ -185,11 +185,13 @@ Our loss would thus become
 \begin{equation}
     J(w) = l(w) +
       \lambda
-        \lt(\lVert w^{(1)} \rVert^2_F + \lVert w^{(2)} \rVert^2_F\rt)
+        \lt(\lVert w^{(1)} \rVert^2 + \lVert w^{(2)} \rVert^2\rt)
 \end{equation}
 where $\lVert w\rVert = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
-In particular, the regularization term is added to the output error $\delta^L$
-during backpropagation. The change in $\delta^L$ is then propagated
+In particular,
+the regularization term is added to the output error $\delta^L$
+during backpropagation.
+The change in $\delta^L$ is then propagated
 through to subsequent error calculations for each hidden layer
 (even though we don't compute the error again).
 Regularization helps prevent weights from becoming too large,
@@ -228,7 +230,8 @@ Figure~\ref{fig:1-2-arch} illustrates the effect
 of these architectures for the classic XOR dataset.
 We observed that a single 5-node hidden layer
 performed comparably to more complex structures,
-while the two 100-node layer network performed the worst, due to overfitting.
+while the two 100-node layer network performed the worst,
+due to overfitting.
 
 We compared our neural network's performance to that of 
 logistic regression and a kernelized Gaussian RBF SVM classifier.
@@ -251,7 +254,8 @@ Our classification accuracies are below.
 
 We also used our neural network
 to perform multi-class classification of the MNIST dataset,
-which consists of $28\times 28$ grayscale images of handwritten decimal digits
+which consists of $28\times 28$ grayscale images
+of handwritten decimal digits
 given as a labeled dataset of $28^2$-dimensional vectors
 with integer entries in $[0,255]$
 representing the grayscale luminance of each pixel.
