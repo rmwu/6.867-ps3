@@ -100,14 +100,14 @@
 \end{figure*}
 
 We implemented a traditional, fully-connected neural network,
-with number of hidden layers and nodes per layer specified by the user.
+with arbitrary user-specified architecture.
 We trained the neural network
 through stochastic gradient descent on our data,
 where gradients were calculated by the
 backpropagation algorithm.
 
-All hidden units were implemented as ReLU units,
-whose activation functions are defined as
+All hidden units were implemented with ReLU activation functions,
+defined as
 \begin{equation}
     f(z) = \max(0, z).
 \end{equation}
@@ -137,17 +137,19 @@ the cross-entropy of the softmax function,
 \end{equation}
 where $\circ$ is element-wise multiplication, $f(z^L)$ is the softmax output,
 and $y$ is the target vector.
-This cross-entropy loss is back propagated through the 
+This cross-entropy loss is backpropagated through the
 loss calculations for the hidden layers,
 which utilize the ReLU gradient instead.
 
-For a toy problem, we tested our neural network on a 2D 3-class dataset,
+We tested our neural network on a 2D 3-class dataset,
 partitioned into 400 training, 200 validation, and 200 testing samples.
-A possible topology for this neural network is drawn in Figure~\ref{fig:samplenn}.
-We noticed that neural network performance was very sensitive to 
+We show a possible topology for this neural network
+in Figure~\ref{fig:samplenn}.
+
+Neural network performance was very sensitive to
 variations in weight initialization and step size.
 For example, bad step sizes often resulted in
-the neural network's predicting only a single value for every given input.
+the network predicting only a single value for all inputs.
 
 \begin{figure*}
    \centering
@@ -194,24 +196,27 @@ and $\delta$ is the calculated backpropagation error.
 
 Since ReLU is not fully differentiable,
 we set the subgradient at 0 to 0.
-As a result, we cannot simply initialize weights to 0,
-else gradients and activations
+As a result, we cannot simply initialize weights to 0;
+otherwise gradients and activations
 will not be updated during training.
-Instead, we initialize weights randomly,
-with values drawn from a Gaussian centered at 0,
-with standard deviation $1/\sqrt{m}$
-for a weight matrix of size $m\times n$.
+Instead, we initialize weights randomly.
+For a weight matrix of size $m\times n$,
+draw values from a Gaussian centered at 0,
+with standard deviation $1/\sqrt{m}$.
 
 To understand the rationale behind this method,
 imagine that all units are sigmoids,
-with activation function $f(z) = \f{1}{1+e^{-z}}$.
-If weights are too small, then the activations will decrease every layer.
-This is an issue since the sigmoid function is approximately linear around 0,
+with activation $f(z) = \f{1}{1+e^{-z}}$.
+If weights are too small,
+activations will become miniscule in shallower layers,
+which is an issue since the sigmoid function
+is approximately linear around 0,
 at which we lose the non-linearity of our hidden layers.
+
 However, if our weights are too large,
-then the activations will increase indefinitely,
-at which point the sigmoid levels off,
-and gradients artificially approach 0.
+activations will grow indefinitely.
+The sigmoid levels off for large inputs,
+so gradients artificially approach 0.
 Thus, we want to maintain a constant variance in gradients between
 inputs and outputs, such that
 \begin{equation}
@@ -222,6 +227,7 @@ For backpropagation, we use the same logic to derive that
 $\sigma^2(W) = 1/m$, so $\sigma(W) = 1/\sqrt{m}$.
 
 \subsubsection{Regularization}
+\label{subsubsec:1-regularize}
 
 To avoid overfitting, we can add a penalty term to our loss function for regularization.
 Our loss would thus become
@@ -242,20 +248,24 @@ so the neural network will overfit less.
 \label{subsubsec:binary}
 
 We tested our implementation against 2D artificial datasets.
-The first three contained 400 training samples,
-200 validation samples,
-and 200 testing samples, and fourth contained 
-400 training, validation, and testing samples.
-The data consisted of two-dimensional vectors $x\sind{i}$
+The first three contained
+400 training,
+200 validation,
+and 200 test samples;
+the fourth contained
+400 each of training, validation, and test samples.
+
+The data consisted of two-dimensional $x\sind{i}$
 labeled by $y\sind{i} = \pm1$.
 To compare the target values against our softmax outputs,
 we mapped $\pm1$ to one-hot vectors $[1,0]$ and $[0,1]$.
-Our results are illustrated in Figure~\ref{fig:1-2-classify},
-with training and testing accuracies denoted.
+Our results are illustrated in Figure~\ref{fig:1-2-classify}.
 
-We trained our neural network with stochastic gradient descent, with a 
-fixed stepsize, $\eta = 0.01$. Stochastic gradient descent terminated when
-the change in cross-entropy loss on our validation set dropped below a constant threshold of 0.001.
+We trained our neural network with stochastic gradient descent,
+using a fixed step size $\eta = 0.01$.
+We terminated gradient descent when
+the change in cross-entropy loss on our validation set
+dropped below a constant threshold of 0.001.
 This loss was calculated once every 100 epochs.
 
 \subsubsection{Architecture variations}
@@ -271,46 +281,46 @@ while the two 100-node layer network performed the worst, due to overfitting.
 
 We compared our neural network's performance to that of 
 logistic regression and a kernelized Gaussian RBF SVM classifier.
-Our neural network achieved comparable performance in accuracy,
-using optimal parameters for all classifiers,
-and two 5-node hidden layers for the neural network.
-Our classification accuracies are shown below.
+We tested neural nets with two 5-node hidden layers.
+The optimal models from each model class (determined by validation)
+performed comparably with the other models.
+Our classification accuracies are below.
 
 \begin{center}
     \begin{tabular}{c|c|c|c}
-        dataset & LR & SVM & NN  \\\hline
-        1	&1.0	& 1.0 & 1.0\\
-        2	&0.81	& 0.94 & 0.92 \\
-        3	&0.975 	& 0.965 & 0.96 \\
-        4	&0.50	& 0.9575 & 0.945
+        dataset & LR (\%) & SVM & NN  \\\hline
+        1	&100.0& 100.0 & 100.0\\
+        2	&81.0 & 94.0 & 92.0 \\
+        3	&97.5 & 96.5 & 96.0 \\
+        4	&50.0 & 95.9 & 94.5
     \end{tabular}
 \end{center}
 
 \subsection{MNIST multi-class classification}
 
-We also used our neural network to perform multi-class classification of the
-MNIST dataset. These data consist $28\times 28$ grayscale images of handwritten
-digits, 0 to 9, given as a labeled dataset of $28^2$ dimensional vectors
-with integer entries $[0,255]$ representing the grayscale luminescence of each pixel.
+We also used our neural network
+to perform multi-class classification of the MNIST dataset,
+which consists of $28\times 28$ grayscale images of handwritten decimal digits
+given as a labeled dataset of $28^2$-dimensional vectors
+with integer entries in $[0,255]$
+representing the grayscale luminance of each pixel.
 
 We normalized input pixel features to the range $[-1, 1]$,
 so that an input vector $x$ is mapped to $\f{2x}{255}-1$,
 with all operations applied componentwise.
 Normalization significantly improved prediction accuracy.
 Class labels were mapped to one-hot vector representations.
-For example, an image labeled 9 would have a 
-target vector of $[0,0,0,0,0,0,0,0,0,1]$.
 We selected 400 training, 200 validation, and 200 testing samples per class.
 
-As in Section \ref{subsubsec:binary}, we determined the termination criteron as
-when the change in objective function (cross-entropy loss on softmax output)
-dropped below a constant threshold, 0.001 (checked every 500 epochs).
+We terminated training as in section~\ref{subsubsec:binary}:
+when the change in cross-entropy loss dropped below 0.001
+(checked every 500 epochs).
 
 \subsubsection{Architecture variations}
 
-We classified our data with different architectures,
-varying number of layers and nodes per layer.
-This is analogous to section~\ref{subsubsec:binaryarch}.
+We tested different architectures on MNIST,
+varying number of layers and nodes per layer,
+in analogy to section~\ref{subsubsec:binaryarch}.
 
 % 20,20
 %Ran for 302500 iterations.
@@ -367,34 +377,38 @@ This is analogous to section~\ref{subsubsec:binaryarch}.
 %Guessed 398 correct out of 400 (0.995)
 %Average loss 0.029611779980850093
 
-% % % % % % % % % %
-%    PROBLEM 2
-% % % % % % % % % %
-
 In addition to $k$-class classification of individual digits,
 we also used our neural network for binary classification of digit pairs,
 to compare with other binary classification methods
 (including logistic regression, a linear SVM,
 and a SVM with a Gaussian RBF kernel).
-For the neural network, we used two 100-node hidden layers,
-and the results are below.
+Our results are below
+(NN refers to a neural net with two 100-node hidden layers).
 
 \begin{center}
     \begin{tabular}{c|c|c|c|c}
-        problem		& NN	& LR		& linear SVM	& RBF kernel \\\hline
-        1, 7 & 0.995 	& 0.99 	& 0.986		& 0.986 \\
-        3, 5 & 0.9725 	& 0.94 	& 0.946		& 0.983 \\
-        4, 9 & 0.9525 	& 0.96 	& 0.943 		& 0.946 \\
+        problem	& NN & LR & linear SVM & RBF SVM \\\hline
+        1, 7 & 99.5 & 99.0 & 98.6 & 98.6 \\
+        3, 5 & 97.3 & 94.0 & 94.6 & 98.3 \\
+        4, 9 & 95.3 & 96.0 & 94.3 & 94.6 \\
     \end{tabular}
 \end{center}
-The neural network had similar accuracy as the methods under comparison.
+Neural network performance with comparable with that of the other models.
+
+
+% % % % % % % % % %
+%    PROBLEM 2
+% % % % % % % % % %
 
 \section{Convolutional Neural Networks}
 
-% TODO connect from previous section
-% you can connect straight from MNIST cuz images
+We next consider image classification
+with convolutional neural networks.
+We direct readers unfamilier with convolutional network architecture
+to the literature.
 
-Empirically, deeper convolution networks work better.
+It is well-known that empirically,
+deeper convolutional networks work better.
 To see why, we introduce the notion of \emph{receptive field}
 of a node (a ``pixel" in a feature map):
 the pixels from the original image that contribute information
@@ -404,8 +418,8 @@ to the node.
 For example,
 consider a convolutional network
 with two successive convolutional layers,
+each with a single feature map (respectively, $Z_1$ and $Z_2$),
 with respective patch sizes $5\times 5$ and $3\times 3$.
-Each layer has a single feature map (which we name $Z_1$ and $Z_2$).
 Then the nodes in $Z_1$ each have $5\times 5$ receptive fields.
 Nodes in $Z_2$ will have $(3 + 5 - 1)^2 = 7\times 7$ receptive fields.
 
@@ -474,21 +488,14 @@ strongly suggesting that our network is overfitting.
 % and choose different values for the pooling filter size and stride.
 % After you applied max pooling, what happened to your results?
 % How did the training accuracy vs. validation accuracy change?
-We modified our network by adding max-pooling
+We tried added max-pooling
 after both convolutional layers.
-We experimented with various pooling filter sizes (1 to 4)
-and strides (1 to 4).
+We experimented with various pooling filter sizes and strides.
 In all cases,
 pooling modestly reduced training accuracies
-(from around $100\%$ to $90\%$),
+(to $\approx 90\%$),
 but did not improve validation accuracies,
 which hovered around $65\%$.
-
-Variations in validation accuracy
-stemmed from the randomness inherent in our stochastic training scheme,
-as variation in accuracy between runs with different hyperparameters
-was comparable to the that between runs with the same hyperparameters.
-% make less verbose?
 
 % What does that tell you about the effect of max pooling on your network?
 We conclude that max-pooling provides little improvement
@@ -541,7 +548,7 @@ validation accuracies were slightly, but noticeably lower.
 
 \subsubsection{Weight regularization}
 
-As we did previously,  % TODO check that this is mentioned in previous section
+As in section~\ref{subsubsec:1-regularize},
 we experimented with adding a regularization term
 to our training loss.
 In particular, we modify our softmax cross-entropy loss $\ell(w)$
@@ -612,7 +619,7 @@ we show a representative plot in Figure~\ref{fig:2-4-4-validation-acc}.
 
 \begin{figure*}[t]
    \centering
-   \includegraphics[width=4in]{img/2-4-4-validation-acc-new.pdf}
+   \includegraphics[width=3.5in]{img/2-4-4-validation-acc-new.pdf}
    \caption{Validation error of our convolutional network during training.}
    \label{fig:2-4-4-validation-acc}
 \end{figure*}
@@ -709,7 +716,7 @@ than our baseline at depth~15 of $64.83 \pm 1.11\%$
 
 \begin{figure*}[t]
    \centering
-   \includegraphics[width=4in]{img/2-5-conv-depth-val-acc.pdf}
+   \includegraphics[width=3.5in]{img/2-5-conv-depth-val-acc.pdf}
    \caption{Mean validation accuracies (with standard errors of the means)
        of convolutional networks with equal depth at both convolutional layers.}
    \label{fig:2-5-conv-depth-val-acc}
@@ -729,10 +736,9 @@ suggesting some degree of overfitting.
 We also varied depths independently.
 In particular,
 we tested ``pyramidal" architectures
-in which we gave the second layer a larger depth
+in which the second layer had a larger depth
 compared with the first.
-Of course, we also tried the inverse architecture,
-with smaller depths on the second layer.
+We also tried the reverse architecture.
 No such architecture performed better
 than the best architecture we found when
 we varied the depths in lockstep (depths 45 and 45).
@@ -740,15 +746,46 @@ we varied the depths in lockstep (depths 45 and 45).
 
 \subsection{Invariance}
 
-The best model we found
-through our experimentation from above
+We experimented further,
+attempting to improve upon the optimal architecture
+from the previous section
+(depths 45 and 45, with pooling layers)
+by adding weight regularization and dropout.
+We failed to do so, however,
+so we evaluated the depth-45 architecture
+by testing it on variations of the validation data.\footnote{These
+    variations were:
+    normal, translated, brightened, darkened,
+    high contrast, low contrast, flipped (reflected), colors inverted.}
 
+We present the results of one test here:
+\begin{center}
+    \begin{tabular}{c|c}
+        transformation & accuracy (\%) \\\hline
+        none & 71.26 \\
+        translated & 37.93\\
+        brightened & 35.63\\
+        darkened & 59.77\\
+        high contrast & 35.63 \\
+        low contrast &59.77\\
+        flipped & 44.83\\
+        inverted & 9.20%
+    \end{tabular}
+\end{center}
+Our model was relatively insensitive
+to decreases in contrast and brightness;
+it was modestly more sensitive to increases in the same.
+Flipping the images also appreciably decreased classification accuracy,
+suggesting that our model learned directional features from the paintings.
+
+On the other hand,
+our network was very sensitive to color inversion,
+suggesting that it learned features
+related to different artists' choice of color.
 
 
 
 \end{multicols}
 
 \end{document}
-
-
 
