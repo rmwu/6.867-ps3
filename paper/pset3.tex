@@ -402,7 +402,7 @@ to the node.
 
 % What are the dimensions of the receptive field for a node in Z2?
 For example,
-suppose we have a convolutional network
+consider a convolutional network
 with two successive convolutional layers,
 with respective patch sizes $5\times 5$ and $3\times 3$.
 Each layer has a single feature map (which we name $Z_1$ and $Z_2$).
@@ -436,7 +436,6 @@ Our last two layers are fully connected.
 The third layer has 64 hidden units;
 the final layer (our output) has 11 units,
 corresponding to the 11 artists represented in our dataset.
-
 % Which activation function is used on the hidden nodes?
 The network applies a ReLU activation on all hidden nodes.
 
@@ -480,10 +479,10 @@ after both convolutional layers.
 We experimented with various pooling filter sizes (1 to 4)
 and strides (1 to 4).
 In all cases,
-pooling modestly reduced training accuracy
+pooling modestly reduced training accuracies
 (from around $100\%$ to $90\%$),
-but did not improve validation accuracy noticeably.
-Accuracy was typically $60\%$ to $70\%$.
+but did not improve validation accuracies,
+which hovered around $65\%$.
 
 Variations in validation accuracy
 stemmed from the randomness inherent in our stochastic training scheme,
@@ -643,7 +642,7 @@ rather than just with training parameters
 %    what is the effect of making the convolutional layers have
 %    a) a larger filter size,
 
-\subsubsection{Filter sizes}
+\subsubsection{Filter sizes, stride}
 
 We tested larger and smaller filter sizes
 on each convolutional layer.
@@ -681,9 +680,6 @@ over our original $5\times 5$ filters.
 %    \end{tabular}
 %\end{center}
 
-
-\subsubsection{Stride}
-
 %    b) a larger stride and
 We tried varying the strides on our convolution100
 al layers as well.
@@ -699,11 +695,11 @@ we used at each layer.
 For this section,
 we including $2\times 2$ max-pooling layers with stride 2
 after each convolutional layer.
+(We found that pooling significantly improved results.)
 
-Holding the depths of the convolutional layers
-equal to each other,
-we find that increasing the depth has a significant positive effect
-on validation accuracies,
+Holding the depths of the two convolutional layers equal,
+we find that increasing the depth
+significantly improved validation accuracies,
 as is evident from Figure~\ref{fig:2-5-conv-depth-val-acc}.
 For instance, at depth 45,
 we achieved a mean validation accuracy of $70.46 \pm 0.91\%$,
@@ -740,6 +736,13 @@ with smaller depths on the second layer.
 No such architecture performed better
 than the best architecture we found when
 we varied the depths in lockstep (depths 45 and 45).
+
+
+\subsection{Invariance}
+
+The best model we found
+through our experimentation from above
+
 
 
 
