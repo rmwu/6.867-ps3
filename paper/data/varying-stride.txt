@@ -1,0 +1,25 @@
+
+Finished training. Total time taken: 89.55591106414795
+Training accuracies: [ 0.9  0.8  0.9  0.8  0.9  0.9  0.8  0.8  0.7  0.9]
+Validation accuracies: [ 0.66666667  0.64367816  0.68965517  0.67816092  0.63218391  0.6091954
+  0.6091954   0.63218391  0.5862069   0.5862069 ]
+Mean training accuracy: 84.00% +- 2.21%
+Mean validation accuracy: 63.33% +- 1.16%
+You ran command: conv.py --strides 4 4 --repeat 10
+
+Finished training. Total time taken: 1270.8897230625153
+Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+Validation accuracies: [ 0.63218391  0.59770115  0.5862069   0.62068966  0.64367816  0.64367816
+  0.59770115  0.64367816  0.52873563  0.51724138]
+Mean training accuracy: 100.00% +- 0.00%
+Mean validation accuracy: 60.11% +- 1.46%
+You ran command: conv.py --strides 1 1 --repeat 10
+
+Validation accuracy: 64.37%
+Finished training. Total time taken: 134.22611594200134
+Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+Validation accuracies: [ 0.62068966  0.65517241  0.64367816  0.62068966  0.62068966  0.64367816
+  0.67816092  0.70114943  0.59770115  0.64367816]
+Mean training accuracy: 100.00% +- 0.00%
+Mean validation accuracy: 64.25% +- 0.96%
+You ran command: conv.py --strides 3 1 --repeat 10

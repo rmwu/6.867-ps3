@@ -175,7 +175,8 @@ To avoid overfitting, we can add a penalty term to our loss function for regular
 Our loss would thus become
 \begin{equation}
     J(w) = l(w) +
-      \lambda(\lVert w^{(1)} \rVert^2_F + \lVert w^{(2)} \rVert^2_F)
+      \lambda
+        \lt(\lVert w^{(1)} \rVert^2_F + \lVert w^{(2)} \rVert^2_F\rt)
 \end{equation}
 where $\lVert w\rVert = \sqrt{\sum_{i,j}{w_{ij}^2}}$ is the Frobenius norm.
 In particular, the regularization term is added to the output error $\delta^L$
@@ -217,11 +218,14 @@ This loss was calculated once every 100 epochs.
 % TODO nice images
 
 \subsubsection{Architecture variations}
-\label{sec:binaryarch}
+\label{subsubsec:binaryarch}
+
 We investigated different architectures for the neural network,
 with varying number of layers and nodes per layer.
-Figure \ref{fig:1-2-arch} illustrates the effect of these architectures for the classic XOR dataset.
-We observed that a single 5-node hidden layer performed comparably to more complex structures,
+Figure~\ref{fig:1-2-arch} illustrates the effect
+of these architectures for the classic XOR dataset.
+We observed that a single 5-node hidden layer
+performed comparably to more complex structures,
 while the two 100-node layer network performed the worst, due to overfitting.
 
 We compared our neural network's performance to that of a
@@ -264,7 +268,8 @@ dropped below a constant threshold, 0.001 (checked every 200 epochs).
 \subsubsection{Architecture variations}
 
 We classified our data with different architectures, varying number of layers
-and nodes per layer. This is analogous to Section \ref{sec:binaryarch}.
+and nodes per layer.
+This is analogous to section~\ref{subsubsec:binaryarch}.
 
 % TODO plug my computer in so I can actually run these
 
@@ -461,7 +466,7 @@ we leave the remaining hyperparameters (e.g. training steps, pooling) unchanged.
 
 We implemented dropout for the fully connected layer (the third layer).
 We tested various values of dropout parameter~$p$,
-the probability we do \emph{not} drop out a number.
+the probability we do \emph{not} drop out a neuron.
 For each $p$, we trained $n=10$ separate models;
 we present the mean training and validation accuracies
 with their respective standard errors here.
@@ -625,7 +630,7 @@ We also tried more novel filter size combinations.
 None yielded any statistically significant improvement
 over our original $5\times 5$ filters.
 
-We present our findings
+We present some of our findings
 in Figure~\ref{fig:filter-size-experiment}.
 
 \begin{figure*}[t]
@@ -653,7 +658,8 @@ in Figure~\ref{fig:filter-size-experiment}.
 \subsubsection{Stride}
 
 %    b) a larger stride and
-We tried varying the strides on our convolutional layers as well.
+We tried varying the strides on our convolution100
+al layers as well.
 No setting we tried yielded statistically significant improvement
 over our baseline $5\times 5$ filters with stride $2$.
 
@@ -663,6 +669,33 @@ over our baseline $5\times 5$ filters with stride $2$.
 
 Finally, we considered the number of feature maps
 we used at each layer.
+For this section,
+we including $2\times 2$ max-pooling layers with stride 2
+after each convolutional layer.
+
+Holding the depths of the convolutional layers
+equal to each other,
+we find that increasing the depth has a significant positive effect
+on validation accuracies,
+as is evident from Figure~\ref{fig:2-5-conv-depth-val-acc}.
+For instance, at depth 45,
+we achieved a mean validation accuracy of $70.46\% \pm 0.91\%$,
+which was statistically significantly greater
+than our baseline at depth 15 of $64.83\% \pm 1.11\%$
+(Student's $t$-test, $p=0.001$).
+
+\begin{figure*}[t]
+   \centering
+   \includegraphics[width=4in]{img/2-5-conv-depth-val-acc.pdf}
+   \caption{Mean validation accuracies (with standard errors of the means)
+       of convolutional networks with equal depth at both convolutional layers.}
+   \label{fig:2-5-conv-depth-val-acc}
+\end{figure*}
+
+The training accuracy was close to perfect
+for each of these tests,
+suggesting overfitting.
+Still, 
 
 
 
@@ -675,99 +708,10 @@ we used at each layer.
 
 
 
-%    Finished training. Total time taken: 185.3328869342804
-%    Training accuracies: [ 0.9  0.9  0.9  0.9  0.9  0.8  0.8  0.9  1.   1. ]
-%    Validation accuracies: [ 0.65517241  0.64367816  0.67816092  0.64367816  0.71264368  0.66666667
-%      0.64367816  0.71264368  0.68965517  0.65517241]
-%    Mean training accuracy: 90.00% +- 2.11%
-%    Mean validation accuracy: 67.01% +- 0.86%
-%    You ran command: conv.py --pooling --depths 12 24 --repeat 10
-
-%    Finished training. Total time taken: 222.4871289730072
-%    Training accuracies: [ 1.   0.9  0.9  0.9  1.   1.   0.8  1.   0.8  1. ]
-%    Validation accuracies: [ 0.67816092  0.70114943  0.66666667  0.65517241  0.67816092  0.64367816
-%      0.63218391  0.71264368  0.70114943  0.66666667]
-%    Mean training accuracy: 93.00% +- 2.60%
-%    Mean validation accuracy: 67.36% +- 0.83%
-%    You ran command: conv.py --pooling --depths 24 12 --repeat 10
-
-%    Finished training. Total time taken: 203.84384393692017
-%    Training accuracies: [ 0.9  1.   1.   0.9  0.9  1.   0.9  1.   1.   1. ]
-%    Validation accuracies: [ 0.67816092  0.64367816  0.68965517  0.67816092  0.66666667  0.67816092
-%      0.64367816  0.67816092  0.59770115  0.67816092]
-%    Mean training accuracy: 96.00% +- 1.63%
-%    Mean validation accuracy: 66.32% +- 0.87%
-%    You ran command: conv.py --pooling --depths 10 30 --repeat 10
-
-
-
 
 \end{multicols}
 
 \end{document}
 
-
-
-%    Finished training. Total time taken: 174.98675990104675
-%    Training accuracies: [ 1.   1.   1.   1.   1.   0.8  1.   1.   0.9  1. ]
-%    Validation accuracies: [ 0.75862069  0.73563218  0.65517241  0.68965517  0.68965517  0.68965517
-%      0.66666667  0.64367816  0.6091954   0.66666667]
-%    Mean training accuracy: 97.00% +- 2.13%
-%    Mean validation accuracy: 68.05% +- 1.37%
-%    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
-
-%    Finished training. Total time taken: 244.02631878852844
-%    Training accuracies: [ 0.9  1.   0.9  1.   0.9  1.   1.   1.   1.   1. ]
-%    Validation accuracies: [ 0.67816092  0.62068966  0.63218391  0.72413793  0.68965517  0.68965517
-%      0.64367816  0.67816092  0.62068966  0.72413793]
-%    Mean training accuracy: 97.00% +- 1.53%
-%    Mean validation accuracy: 67.01% +- 1.24%
-
-%    67.5287356 \pm 0.905346418252
-%    You ran command: conv.py --filter_sizes 9 5 --pooling --repeat 10
-
-%    Finished training. Total time taken: 130.73607516288757
-%    Training accuracies: [ 0.9  1.   1.   1.   0.9  1.   0.9  1.   1.   0.9]
-%    Validation accuracies: [ 0.67816092  0.64367816  0.63218391  0.64367816  0.62068966  0.62068966
-%      0.66666667  0.65517241  0.6091954   0.66666667]
-%    Mean training accuracy: 96.00% +- 1.63%
-%    Mean validation accuracy: 64.37% +- 0.73%
-%    You ran command: conv.py --filter_sizes 7 5 --pooling --repeat 10
-
-%    Finished training. Total time taken: 191.86493802070618
-%    Training accuracies: [ 1.   0.9  1.   0.9  0.7  0.6  1.   1.   0.8  1. ]
-%    Validation accuracies: [ 0.6091954   0.71264368  0.6091954   0.68965517  0.64367816  0.64367816
-%      0.68965517  0.66666667  0.65517241  0.64367816]
-%    Mean training accuracy: 89.00% +- 4.58%
-%    Mean validation accuracy: 65.63% +- 1.08%
-%    You ran command: conv.py --filter_sizes 9 3 --pooling --repeat 10
-
-
-
-
-%    Finished training. Total time taken: 89.55591106414795
-%    Training accuracies: [ 0.9  0.8  0.9  0.8  0.9  0.9  0.8  0.8  0.7  0.9]
-%    Validation accuracies: [ 0.66666667  0.64367816  0.68965517  0.67816092  0.63218391  0.6091954
-%      0.6091954   0.63218391  0.5862069   0.5862069 ]
-%    Mean training accuracy: 84.00% +- 2.21%
-%    Mean validation accuracy: 63.33% +- 1.16%
-%    You ran command: conv.py --strides 4 4 --repeat 10
-
-%    Finished training. Total time taken: 1270.8897230625153
-%    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
-%    Validation accuracies: [ 0.63218391  0.59770115  0.5862069   0.62068966  0.64367816  0.64367816
-%      0.59770115  0.64367816  0.52873563  0.51724138]
-%    Mean training accuracy: 100.00% +- 0.00%
-%    Mean validation accuracy: 60.11% +- 1.46%
-%    You ran command: conv.py --strides 1 1 --repeat 10
-
-%    Validation accuracy: 64.37%
-%    Finished training. Total time taken: 134.22611594200134
-%    Training accuracies: [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
-%    Validation accuracies: [ 0.62068966  0.65517241  0.64367816  0.62068966  0.62068966  0.64367816
-%      0.67816092  0.70114943  0.59770115  0.64367816]
-%    Mean training accuracy: 100.00% +- 0.00%
-%    Mean validation accuracy: 64.25% +- 0.96%
-%    You ran command: conv.py --strides 3 1 --repeat 10
 
 
